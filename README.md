@@ -4,7 +4,7 @@ This is part of the training of the Patrick Collins's Advanced Foundry course by
 
 The stablecoin created is TestStableCoin with the TSC ticker, and I deployed it to Somnia testnet here:
 
-[Stablecoin]((https://somnia-testnet.socialscan.io/address/0x165261c1BDd0bAF7970b089888880FdEC0D2351e))
+https://somnia-testnet.socialscan.io/address/0x165261c1BDd0bAF7970b089888880FdEC0D2351e
 
 # About
 
