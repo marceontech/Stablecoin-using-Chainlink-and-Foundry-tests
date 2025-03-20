@@ -194,7 +194,7 @@ So, then you have two options:
 1. That is an official repo maintained by the same org
 2. It downloads from the official release cycle `chainlink/contracts` use (npm) and packages it nicely for digestion from foundry.
 
-# Thank you!
+# Thank you TO pATRICK cOLLINS WITH THE HELP IN THIS PROJECT!
 
 If you appreciated this, feel free to follow or donate to PATRICK COLLINS!
 
