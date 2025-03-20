@@ -10,7 +10,7 @@ import { Test } from "forge-std/Test.sol";
 import { ERC20Mock } from "../../mocks/ERC20Mock.sol";
 
 import { MockV3Aggregator } from "../../mocks/MockV3Aggregator.sol";
-import { DSCEngine, AggregatorV3Interface } from "../../../src/DSCEngine.sol";
+import { TSCEngine, AggregatorV3Interface } from "../../../src/TSCEngine.sol";
 import { DecentralizedStableCoin } from "../../../src/DecentralizedStableCoin.sol";
 // import {Randomish, EnumerableSet} from "../Randomish.sol"; // Randomish is not found in the codebase, EnumerableSet
 // is imported from openzeppelin
@@ -22,8 +22,8 @@ contract ContinueOnRevertHandler is Test {
     // using Randomish for EnumerableSet.AddressSet;
 
     // Deployed contracts to interact with
-    DSCEngine public dscEngine;
-    DecentralizedStableCoin public dsc;
+    TSCEngine public TSCEngine;
+    DecentralizedStableCoin public TSC;
     MockV3Aggregator public ethUsdPriceFeed;
     MockV3Aggregator public btcUsdPriceFeed;
     ERC20Mock public weth;
@@ -32,58 +32,58 @@ contract ContinueOnRevertHandler is Test {
     // Ghost Variables
     uint96 public constant MAX_DEPOSIT_SIZE = type(uint96).max;
 
-    constructor(DSCEngine _dscEngine, DecentralizedStableCoin _dsc) {
-        dscEngine = _dscEngine;
-        dsc = _dsc;
+    constructor(TSCEngine _TSCEngine, DecentralizedStableCoin _TSC) {
+        TSCEngine = _TSCEngine;
+        TSC = _TSC;
 
-        address[] memory collateralTokens = dscEngine.getCollateralTokens();
+        address[] memory collateralTokens = TSCEngine.getCollateralTokens();
         weth = ERC20Mock(collateralTokens[0]);
         wbtc = ERC20Mock(collateralTokens[1]);
 
-        ethUsdPriceFeed = MockV3Aggregator(dscEngine.getCollateralTokenPriceFeed(address(weth)));
-        btcUsdPriceFeed = MockV3Aggregator(dscEngine.getCollateralTokenPriceFeed(address(wbtc)));
+        ethUsdPriceFeed = MockV3Aggregator(TSCEngine.getCollateralTokenPriceFeed(address(weth)));
+        btcUsdPriceFeed = MockV3Aggregator(TSCEngine.getCollateralTokenPriceFeed(address(wbtc)));
     }
 
     // FUNCTIONS TO INTERACT WITH
 
     ///////////////
-    // DSCEngine //
+    // TSCEngine //
     ///////////////
     function mintAndDepositCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
         amountCollateral = bound(amountCollateral, 0, MAX_DEPOSIT_SIZE);
         ERC20Mock collateral = _getCollateralFromSeed(collateralSeed);
         collateral.mint(msg.sender, amountCollateral);
-        dscEngine.depositCollateral(address(collateral), amountCollateral);
+        TSCEngine.depositCollateral(address(collateral), amountCollateral);
     }
 
     function redeemCollateral(uint256 collateralSeed, uint256 amountCollateral) public {
         amountCollateral = bound(amountCollateral, 0, MAX_DEPOSIT_SIZE);
         ERC20Mock collateral = _getCollateralFromSeed(collateralSeed);
-        dscEngine.redeemCollateral(address(collateral), amountCollateral);
+        TSCEngine.redeemCollateral(address(collateral), amountCollateral);
     }
 
-    function burnDsc(uint256 amountDsc) public {
-        amountDsc = bound(amountDsc, 0, dsc.balanceOf(msg.sender));
-        dsc.burn(amountDsc);
+    function burnTSC(uint256 amountTSC) public {
+        amountTSC = bound(amountTSC, 0, TSC.balanceOf(msg.sender));
+        TSC.burn(amountTSC);
     }
 
-    function mintDsc(uint256 amountDsc) public {
-        amountDsc = bound(amountDsc, 0, MAX_DEPOSIT_SIZE);
-        dsc.mint(msg.sender, amountDsc);
+    function mintTSC(uint256 amountTSC) public {
+        amountTSC = bound(amountTSC, 0, MAX_DEPOSIT_SIZE);
+        TSC.mint(msg.sender, amountTSC);
     }
 
     function liquidate(uint256 collateralSeed, address userToBeLiquidated, uint256 debtToCover) public {
         ERC20Mock collateral = _getCollateralFromSeed(collateralSeed);
-        dscEngine.liquidate(address(collateral), userToBeLiquidated, debtToCover);
+        TSCEngine.liquidate(address(collateral), userToBeLiquidated, debtToCover);
     }
 
     /////////////////////////////
     // DecentralizedStableCoin //
     /////////////////////////////
-    function transferDsc(uint256 amountDsc, address to) public {
-        amountDsc = bound(amountDsc, 0, dsc.balanceOf(msg.sender));
+    function transferTSC(uint256 amountTSC, address to) public {
+        amountTSC = bound(amountTSC, 0, TSC.balanceOf(msg.sender));
         vm.prank(msg.sender);
-        dsc.transfer(to, amountDsc);
+        TSC.transfer(to, amountTSC);
     }
 
     /////////////////////////////
@@ -93,7 +93,7 @@ contract ContinueOnRevertHandler is Test {
         // int256 intNewPrice = int256(uint256(newPrice));
         int256 intNewPrice = 0;
         ERC20Mock collateral = _getCollateralFromSeed(collateralSeed);
-        MockV3Aggregator priceFeed = MockV3Aggregator(dscEngine.getCollateralTokenPriceFeed(address(collateral)));
+        MockV3Aggregator priceFeed = MockV3Aggregator(TSCEngine.getCollateralTokenPriceFeed(address(collateral)));
 
         priceFeed.updateAnswer(intNewPrice);
     }
@@ -108,8 +108,8 @@ contract ContinueOnRevertHandler is Test {
     }
 
     function callSummary() external view {
-        console.log("Weth total deposited", weth.balanceOf(address(dscEngine)));
-        console.log("Wbtc total deposited", wbtc.balanceOf(address(dscEngine)));
-        console.log("Total supply of DSC", dsc.totalSupply());
+        console.log("Weth total deposited", weth.balanceOf(address(TSCEngine)));
+        console.log("Wbtc total deposited", wbtc.balanceOf(address(TSCEngine)));
+        console.log("Total supply of TSC", TSC.totalSupply());
     }
 }

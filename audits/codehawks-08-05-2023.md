@@ -10,41 +10,41 @@
     - [H-04. Business Logic: Protocol Liquidation Arithmetic](#H-04)
 - ## Medium Risk Findings
     - [M-01. staleCheckLatestRoundData() does not check the status of the Arbitrum sequencer in Chainlink feeds.](#M-01)
-    - [M-02. DSC protocol can consume stale price data or cannot operate on some EVM chains](#M-02)
+    - [M-02. TSC protocol can consume stale price data or cannot operate on some EVM chains](#M-02)
     - [M-03. Chainlink oracle will return the wrong price if the aggregator hits `minAnswer`](#M-03)
     - [M-04. All of the USD pair price feeds doesn't have 8 decimals](#M-04)
     - [M-05. Anyone can burn **DecentralizedStableCoin** tokens with `burnFrom` function](#M-05)
-    - [M-06. Double-spending vulnerability leads to a disruption of the DSC token](#M-06)
+    - [M-06. Double-spending vulnerability leads to a disruption of the TSC token](#M-06)
     - [M-07. Lack of fallbacks for price feed oracle](#M-07)
-    - [M-08. Too many DSC tokens can get minted for fee-on-transfer tokens.](#M-08)
+    - [M-08. Too many TSC tokens can get minted for fee-on-transfer tokens.](#M-08)
     - [M-09. `liquidate` does not allow the liquidator to liquidate a user if the liquidator HF < 1](#M-09)
     - [M-10. Protocol can break for a token with a proxy and implementation contract (like `TUSD`)](#M-10)
     - [M-11. Liquidators can be front-run to their loss](#M-11)
     - [M-12. DoS of full liquidations are possible by frontrunning the liquidators](#M-12)
 - ## Low Risk Findings
-    - [L-01. Improving the burnDsc() to allow users to mitigate their liquidation's impact](#L-01)
+    - [L-01. Improving the burnTSC() to allow users to mitigate their liquidation's impact](#L-01)
     - [L-02. Zero address check for tokens](#L-02)
     - [L-03. Lack of events for critical actions](#L-03)
     - [L-04. Pragma isn't specified correctly which can lead to nonfunction/damaged contract when deployed on Arbitrum](#L-04)
     - [L-05. Precision loss when calculating the health factor](#L-05)
-    - [L-06. Unbounded Loops Found in DSCEngine.sol can lead to DoS of liquidations](#L-06)
+    - [L-06. Unbounded Loops Found in TSCEngine.sol can lead to DoS of liquidations](#L-06)
     - [L-07. Missing Division By 0 Check](#L-07)
 - ## Gas Optimizations / Informationals
     - [G-01. using x=x+y /x=x-y  is more gas efficient than x+=y / x-=y](#G-01)
     - [G-02. Remove unused variables in `OracleLib`](#G-02)
     - [G-03. Use constants instead of `type(uint256).max`](#G-03)
     - [G-04. Double checks](#G-04)
-    - [G-05. `DSCEngine` should deploy its own `DecentralizedStableCoin`](#G-05)
+    - [G-05. `TSCEngine` should deploy its own `DecentralizedStableCoin`](#G-05)
     - [G-06. `burn()` and `staleCheckLatestRoundData()` and `getTimeout()` can be `external`](#G-06)
     - [G-07. Replace OZ's library with Solmate to save gas](#G-07)
     - [G-08. Use `==` instead for `<=` for `uints` when comparing for `zero` values](#G-08)
-    - [G-09. # `_burnDsc` function on `DSCEngine` can be simplified](#G-09)
+    - [G-09. # `_burnTSC` function on `TSCEngine` can be simplified](#G-09)
     - [G-10. `Ownable` and `ERC20Burneable` implementations arent necesary in `DecentralizedStableCoin`](#G-10)
     - [G-11. `++i`/`i++` should be `unchecked{++i}`/`unchecked{i++}` when it is not possible for them to overflow, as is the case when used in `for`- and `while`-loops](#G-11)
     - [G-12. No amountCollateral > balance check](#G-12)
     - [G-13. Constants should be be used for hardcoded values](#G-13)
     - [G-14. [L-02] It is not specified which token is not allowed ](#G-14)
-    - [G-15. DSC Mint will either return true or revert, thus checking `minted` status in `mintDcs` is unnecessary](#G-15)
+    - [G-15. TSC Mint will either return true or revert, thus checking `minted` status in `mintDcs` is unnecessary](#G-15)
     - [G-16. Spelling errors](#G-16)
     - [G-17. Non Critical Issues：Discrepancy between code and comments](#G-17)
     - [G-18. The nonReentrant modifier should occur before all other modifiers](#G-18)
@@ -53,7 +53,7 @@
     - [G-21. Combine Multiple Mapping Address](#G-21)
     - [G-22. [G-01] - Use `do-while` loop instead of `for-loop` to save users gas cost.](#G-22)
     - [G-23. Redundant check for transfer success](#G-23)
-    - [G-24. Misleading comment in DSCEngine._healthFactor](#G-24)
+    - [G-24. Misleading comment in TSCEngine._healthFactor](#G-24)
     - [G-25. Prefer array assignment over pushing elements in for-loops](#G-25)
     - [G-26. [I-1] NatSpec `@param` is missing](#G-26)
     - [G-27. NatSpec `@return` argument is missing](#G-27)
@@ -100,29 +100,29 @@ _Submitted by [kutu](/profile/clk7qwwzw001gm9088xsr6a22), [Bobface](/profile/clk
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L347
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L347
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L366
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L366
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L356
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L356
 
 ## Summary
-The token prices computed by `DSCEngine#getTokenAmountFromUsd()` and `DSCEngine#getUsdValue()` fail to account for token decimals. As written, these methods assume that all tokens have 18 decimals; however, one of the stated collateral tokens is `WBTC`, which has only 8 decimals on Ethereum mainnet.
+The token prices computed by `TSCEngine#getTokenAmountFromUsd()` and `TSCEngine#getUsdValue()` fail to account for token decimals. As written, these methods assume that all tokens have 18 decimals; however, one of the stated collateral tokens is `WBTC`, which has only 8 decimals on Ethereum mainnet.
 
 This 18-decimal assumption creates a discrepancy between the protocol-computed USD value and actual USD value of tokens with non-standard decimals. As a result, any deposited collateral token with fewer than 18 decimals (including `WBTC`) can potentially be stolen by an attacker.
 
 ## Vulnerability Details
-This line from `DSCEngine#getTokenAmountFromUsd()` contains scaling adjustments for the price feed's own precision (expressed to 8 decimals), but no such adjustments for the token's own decimals. The return value always has 18 decimals, but it should instead match the token's decimals since it returns a token amount.
+This line from `TSCEngine#getTokenAmountFromUsd()` contains scaling adjustments for the price feed's own precision (expressed to 8 decimals), but no such adjustments for the token's own decimals. The return value always has 18 decimals, but it should instead match the token's decimals since it returns a token amount.
 ```solidity
 return (usdAmountInWei * PRECISION) / (uint256(price) * ADDITIONAL_FEED_PRECISION);
 ```
 
-This line from `DSCEngine#getUsdValue()` contains the same issue but in the opposite direction. The return value always has the same number of decimals as the token itself, whereas it is supposed to be an 18-decimal USD amount.
+This line from `TSCEngine#getUsdValue()` contains the same issue but in the opposite direction. The return value always has the same number of decimals as the token itself, whereas it is supposed to be an 18-decimal USD amount.
 ```solidity
 return ((uint256(price) * ADDITIONAL_FEED_PRECISION) * amount) / PRECISION;
 ```
 
-When various USD values are added together in this line from `DSCEngine#getAccountCollateralValue()`, the total collateral value is incorrect because the terms of the sum may have different decimals, and therefore different frames of reference.
+When various USD values are added together in this line from `TSCEngine#getAccountCollateralValue()`, the total collateral value is incorrect because the terms of the sum may have different decimals, and therefore different frames of reference.
 ```solidity
 totalCollateralValueInUsd += getUsdValue(token, amount);
 ```
@@ -133,8 +133,8 @@ A proof of concept for the attack is provided below. Note that this test utilize
 
 pragma solidity 0.8.19;
 
-import {DeployDSC} from "../../script/DeployDSC.s.sol";
-import {DSCEngine} from "../../src/DSCEngine.sol";
+import {DeployTSC} from "../../script/DeployTSC.s.sol";
+import {TSCEngine} from "../../src/TSCEngine.sol";
 import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {ERC20DecimalsMock} from "@openzeppelin/contracts/mocks/ERC20DecimalsMock.sol";
@@ -143,8 +143,8 @@ import {Test, console} from "forge-std/Test.sol";
 import {StdCheats} from "forge-std/StdCheats.sol";
 
 contract TokenDecimalExploit is StdCheats, Test {
-    DSCEngine public dsce;
-    DecentralizedStableCoin public dsc;
+    TSCEngine public TSCe;
+    DecentralizedStableCoin public TSC;
     HelperConfig public helperConfig;
 
     address public ethUsdPriceFeed;
@@ -166,8 +166,8 @@ contract TokenDecimalExploit is StdCheats, Test {
     uint256 public constant LIQUIDATION_PRECISION = 100;
 
     function setUp() external {
-        DeployDSC deployer = new DeployDSC();
-        (dsc, dsce, helperConfig) = deployer.run();
+        DeployTSC deployer = new DeployTSC();
+        (TSC, TSCe, helperConfig) = deployer.run();
         (ethUsdPriceFeed, btcUsdPriceFeed, weth, wbtc, deployerKey) = helperConfig.activeNetworkConfig();
         if (block.chainid == 31337) {
             vm.deal(user, STARTING_USER_BALANCE);
@@ -187,82 +187,82 @@ contract TokenDecimalExploit is StdCheats, Test {
      *
      * On Ethereum mainnet, WETH and WBTC have 18 and 8 decimals, respectively.
      * The current prices of WETH and WBTC are close to $2,000 and $30,000, respectively.
-     * The `DSCEngine` allows a user to borrow up to the liquidation threshold.
-     * The `DSCEngine` fails to account for token decimals when computing USD prices.
+     * The `TSCEngine` allows a user to borrow up to the liquidation threshold.
+     * The `TSCEngine` fails to account for token decimals when computing USD prices.
      */ 
     function testExploitTokenDecimals() public {
         // Set initial prices.
         MockV3Aggregator(ethUsdPriceFeed).updateAnswer(int256(2_000 * 10**feedDecimals)); // $2,000
         MockV3Aggregator(btcUsdPriceFeed).updateAnswer(int256(30_000 * 10**feedDecimals)); // $30,000
 
-        // A user borrows the maximum possible amount of DSC using WETH as collateral.
+        // A user borrows the maximum possible amount of TSC using WETH as collateral.
         vm.startPrank(user);
         uint256 amountWethDeposited = 1 * 10**wethDecimals; // 1 WETH
         uint256 expectedValueWeth = 2_000 ether; // $2,000
-        uint256 amountDscFromWeth = (expectedValueWeth * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
-        ERC20DecimalsMock(weth).approve(address(dsce), amountWethDeposited);
-        dsce.depositCollateralAndMintDsc(weth, amountWethDeposited, amountDscFromWeth);
-        assertEq(dsc.balanceOf(user), amountDscFromWeth);
+        uint256 amountTSCFromWeth = (expectedValueWeth * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+        ERC20DecimalsMock(weth).approve(address(TSCe), amountWethDeposited);
+        TSCe.depositCollateralAndMintTSC(weth, amountWethDeposited, amountTSCFromWeth);
+        assertEq(TSC.balanceOf(user), amountTSCFromWeth);
         vm.stopPrank();
 
         // The user's 1 WETH should be worth $2,000 as we expect.
-        uint256 valueWeth = dsce.getUsdValue(weth, amountWethDeposited);
+        uint256 valueWeth = TSCe.getUsdValue(weth, amountWethDeposited);
         assertEq(valueWeth, expectedValueWeth);
 
         // Similarly, the reciprocal is true.
-        uint256 amountWeth = dsce.getTokenAmountFromUsd(weth, expectedValueWeth);
+        uint256 amountWeth = TSCe.getTokenAmountFromUsd(weth, expectedValueWeth);
         assertEq(amountWeth, amountWethDeposited);
 
-        // Now the user borrows more DSC using WBTC collateral.
+        // Now the user borrows more TSC using WBTC collateral.
         // The flawed price computation ensures that the user can't borrow much at all, but they will anyway.
         vm.startPrank(user);
         uint256 amountWbtcDeposited = 1 * 10**wbtcDecimals; // 1 WBTC
         // This is the flaw! Given WBTC's 8 decimals, this WBTC is priced at $0.000003 instead of $30,000.
         uint256 expectedValueWbtc = 30_000 * 10**wbtcDecimals; // $0.000003 != $30,000
-        uint256 amountDscFromWbtc = (expectedValueWbtc * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
-        ERC20DecimalsMock(wbtc).approve(address(dsce), amountWbtcDeposited);
-        dsce.depositCollateralAndMintDsc(wbtc, amountWbtcDeposited, amountDscFromWbtc);
-        assertEq(dsc.balanceOf(user), amountDscFromWeth + amountDscFromWbtc);
+        uint256 amountTSCFromWbtc = (expectedValueWbtc * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
+        ERC20DecimalsMock(wbtc).approve(address(TSCe), amountWbtcDeposited);
+        TSCe.depositCollateralAndMintTSC(wbtc, amountWbtcDeposited, amountTSCFromWbtc);
+        assertEq(TSC.balanceOf(user), amountTSCFromWeth + amountTSCFromWbtc);
         vm.stopPrank();
 
         // The user's 1 WBTC is worth far too little.
-        uint256 valueWbtc = dsce.getUsdValue(wbtc, amountWbtcDeposited);
+        uint256 valueWbtc = TSCe.getUsdValue(wbtc, amountWbtcDeposited);
         assertEq(valueWbtc, expectedValueWbtc);
 
         // Similarly, the reciprocal is true.
-        uint256 amountWbtc = dsce.getTokenAmountFromUsd(wbtc, expectedValueWbtc);
+        uint256 amountWbtc = TSCe.getTokenAmountFromUsd(wbtc, expectedValueWbtc);
         assertEq(amountWbtc, amountWbtcDeposited);
 
-        // An exploiter acquires DSC to perform a liquidation (DSC could have come from the market, but we borrow it).
+        // An exploiter acquires TSC to perform a liquidation (TSC could have come from the market, but we borrow it).
         vm.startPrank(exploiter);
-        ERC20DecimalsMock(weth).approve(address(dsce), amountWethDeposited);
-        dsce.depositCollateralAndMintDsc(weth, amountWethDeposited, amountDscFromWeth);
-        assertEq(dsc.balanceOf(exploiter), amountDscFromWeth);
+        ERC20DecimalsMock(weth).approve(address(TSCe), amountWethDeposited);
+        TSCe.depositCollateralAndMintTSC(weth, amountWethDeposited, amountTSCFromWeth);
+        assertEq(TSC.balanceOf(exploiter), amountTSCFromWeth);
         vm.stopPrank();
 
         // Over time, the price of WBTC falls just slightly. The user is now vulnerable to liquidation.
         MockV3Aggregator(btcUsdPriceFeed).updateAnswer(int256(29_999 * 10**feedDecimals)); // $29,999
-        uint256 newValueWbtc = dsce.getUsdValue(wbtc, amountWbtcDeposited);
-        assertTrue(dsce.getHealthFactor(user) < MIN_HEALTH_FACTOR);
+        uint256 newValueWbtc = TSCe.getUsdValue(wbtc, amountWbtcDeposited);
+        assertTrue(TSCe.getHealthFactor(user) < MIN_HEALTH_FACTOR);
 
-        // The exploiter liquidates the user's WBTC by paying back an "equivalent" amount of DSC.
+        // The exploiter liquidates the user's WBTC by paying back an "equivalent" amount of TSC.
         // The amount is actually far too low given the flawed price calculation.
-        // After this, the exploiter still has plenty of DSC and all of the user's WBTC.
+        // After this, the exploiter still has plenty of TSC and all of the user's WBTC.
         // The exploiter paid ~$0.0000027 for ~$30,000 worth of WBTC.
         vm.startPrank(exploiter);
         // This comes out to about $0.0000027 (reduced from $0.000003 to account for 10% liquidation bonus)
         uint256 debtToPay = (newValueWbtc * LIQUIDATION_PRECISION) / (LIQUIDATION_PRECISION + LIQUIDATION_BONUS);
-        dsc.approve(address(dsce), debtToPay);
-        dsce.liquidate(wbtc, user, debtToPay);
+        TSC.approve(address(TSCe), debtToPay);
+        TSCe.liquidate(wbtc, user, debtToPay);
         vm.stopPrank();
         
-        // Exploiter has all of the WBTC and still lots of DSC left!
+        // Exploiter has all of the WBTC and still lots of TSC left!
         uint256 err = 0.0001 ether; // 0.01% allowable relative error to account for rounding
         assertApproxEqRel(ERC20DecimalsMock(wbtc).balanceOf(exploiter), amountWbtcDeposited, err);
-        assertApproxEqRel(dsc.balanceOf(exploiter), amountDscFromWeth, err);
+        assertApproxEqRel(TSC.balanceOf(exploiter), amountTSCFromWeth, err);
 
-        // User has no WBTC left in the `DSCEngine`.
-        assertApproxEqAbs(dsce.getCollateralBalanceOfUser(user, wbtc), 0, 1); // 1 wei of allowable error for rounding
+        // User has no WBTC left in the `TSCEngine`.
+        assertApproxEqAbs(TSCe.getCollateralBalanceOfUser(user, wbtc), 0, 1); // 1 wei of allowable error for rounding
     }
 }
 ```
@@ -324,20 +324,20 @@ index c9083ad..98c2b56 100644
          vm.stopBroadcast();
  
          return NetworkConfig({
-diff --git a/test/unit/DSCEngineTest.t.sol b/test/unit/DSCEngineTest.t.sol
+diff --git a/test/unit/TSCEngineTest.t.sol b/test/unit/TSCEngineTest.t.sol
 index f697f8d..dc2de7d 100644
---- a/test/unit/DSCEngineTest.t.sol
-+++ b/test/unit/DSCEngineTest.t.sol
-@@ -6,7 +6,7 @@ import {DeployDSC} from "../../script/DeployDSC.s.sol";
- import {DSCEngine} from "../../src/DSCEngine.sol";
+--- a/test/unit/TSCEngineTest.t.sol
++++ b/test/unit/TSCEngineTest.t.sol
+@@ -6,7 +6,7 @@ import {DeployTSC} from "../../script/DeployTSC.s.sol";
+ import {TSCEngine} from "../../src/TSCEngine.sol";
  import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
  import {HelperConfig} from "../../script/HelperConfig.s.sol";
 -import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
 +import {ERC20DecimalsMock} from "@openzeppelin/contracts/mocks/ERC20DecimalsMock.sol";
- import {MockMoreDebtDSC} from "../mocks/MockMoreDebtDSC.sol";
- import {MockFailedMintDSC} from "../mocks/MockFailedMintDSC.sol";
+ import {MockMoreDebtTSC} from "../mocks/MockMoreDebtTSC.sol";
+ import {MockFailedMintTSC} from "../mocks/MockFailedMintTSC.sol";
  import {MockFailedTransferFrom} from "../mocks/MockFailedTransferFrom.sol";
-@@ -24,6 +24,8 @@ contract DSCEngineTest is StdCheats, Test {
+@@ -24,6 +24,8 @@ contract TSCEngineTest is StdCheats, Test {
      address public btcUsdPriceFeed;
      address public weth;
      address public wbtc;
@@ -346,7 +346,7 @@ index f697f8d..dc2de7d 100644
      uint256 public deployerKey;
  
      uint256 amountCollateral = 10 ether;
-@@ -58,8 +60,11 @@ contract DSCEngineTest is StdCheats, Test {
+@@ -58,8 +60,11 @@ contract TSCEngineTest is StdCheats, Test {
          //     vm.etch(ethUsdPriceFeed, address(aggregatorMock).code);
          //     vm.etch(btcUsdPriceFeed, address(aggregatorMock).code);
          // }
@@ -360,18 +360,18 @@ index f697f8d..dc2de7d 100644
      }
  
      ///////////////////////
-@@ -81,21 +86,36 @@ contract DSCEngineTest is StdCheats, Test {
+@@ -81,21 +86,36 @@ contract TSCEngineTest is StdCheats, Test {
      // Price Tests //
      //////////////////
  
 -    function testGetTokenAmountFromUsd() public {
 -        // If we want $100 of WETH @ $2000/WETH, that would be 0.05 WETH
 -        uint256 expectedWeth = 0.05 ether;
--        uint256 amountWeth = dsce.getTokenAmountFromUsd(weth, 100 ether);
+-        uint256 amountWeth = TSCe.getTokenAmountFromUsd(weth, 100 ether);
 +    function testGetWethTokenAmountFromUsd() public {
 +        // If we want $10,000 of WETH @ $2000/WETH, that would be 5 WETH
 +        uint256 expectedWeth = 5 * 10**wethDecimals;
-+        uint256 amountWeth = dsce.getTokenAmountFromUsd(weth, 10_000 ether);
++        uint256 amountWeth = TSCe.getTokenAmountFromUsd(weth, 10_000 ether);
          assertEq(amountWeth, expectedWeth);
      }
  
@@ -382,7 +382,7 @@ index f697f8d..dc2de7d 100644
 +    function testGetWbtcTokenAmountFromUsd() public {
 +        // If we want $10,000 of WBTC @ $1000/WBTC, that would be 10 WBTC
 +        uint256 expectedWbtc = 10 * 10**wbtcDecimals;
-+        uint256 amountWbtc = dsce.getTokenAmountFromUsd(wbtc, 10_000 ether);
++        uint256 amountWbtc = TSCe.getTokenAmountFromUsd(wbtc, 10_000 ether);
 +        assertEq(amountWbtc, expectedWbtc);
 +    }
 +
@@ -390,7 +390,7 @@ index f697f8d..dc2de7d 100644
 +        uint256 ethAmount = 15 * 10**wethDecimals;
 +        // 15 ETH * $2000/ETH = $30,000
 +        uint256 expectedUsd = 30_000 ether;
-         uint256 usdValue = dsce.getUsdValue(weth, ethAmount);
+         uint256 usdValue = TSCe.getUsdValue(weth, ethAmount);
          assertEq(usdValue, expectedUsd);
      }
  
@@ -398,32 +398,32 @@ index f697f8d..dc2de7d 100644
 +        uint256 btcAmount = 15 * 10**wbtcDecimals;
 +        // 15 BTC * $1000/BTC = $15,000
 +        uint256 expectedUsd = 15_000 ether;
-+        uint256 usdValue = dsce.getUsdValue(wbtc, btcAmount);
++        uint256 usdValue = TSCe.getUsdValue(wbtc, btcAmount);
 +        assertEq(usdValue, expectedUsd);
 +    }
 +
      ///////////////////////////////////////
      // depositCollateral Tests //
      ///////////////////////////////////////
-@@ -119,7 +139,7 @@ contract DSCEngineTest is StdCheats, Test {
-         mockDsc.transferOwnership(address(mockDsce));
+@@ -119,7 +139,7 @@ contract TSCEngineTest is StdCheats, Test {
+         mockTSC.transferOwnership(address(mockTSCe));
          // Arrange - User
          vm.startPrank(user);
--        ERC20Mock(address(mockDsc)).approve(address(mockDsce), amountCollateral);
-+        ERC20DecimalsMock(address(mockDsc)).approve(address(mockDsce), amountCollateral);
+-        ERC20Mock(address(mockTSC)).approve(address(mockTSCe), amountCollateral);
++        ERC20DecimalsMock(address(mockTSC)).approve(address(mockTSCe), amountCollateral);
          // Act / Assert
-         vm.expectRevert(DSCEngine.DSCEngine__TransferFailed.selector);
-         mockDsce.depositCollateral(address(mockDsc), amountCollateral);
-@@ -128,7 +148,7 @@ contract DSCEngineTest is StdCheats, Test {
+         vm.expectRevert(TSCEngine.TSCEngine__TransferFailed.selector);
+         mockTSCe.depositCollateral(address(mockTSC), amountCollateral);
+@@ -128,7 +148,7 @@ contract TSCEngineTest is StdCheats, Test {
  
      function testRevertsIfCollateralZero() public {
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(dsce), amountCollateral);
+-        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(TSCe), amountCollateral);
  
-         vm.expectRevert(DSCEngine.DSCEngine__NeedsMoreThanZero.selector);
-         dsce.depositCollateral(weth, 0);
-@@ -136,7 +156,8 @@ contract DSCEngineTest is StdCheats, Test {
+         vm.expectRevert(TSCEngine.TSCEngine__NeedsMoreThanZero.selector);
+         TSCe.depositCollateral(weth, 0);
+@@ -136,7 +156,8 @@ contract TSCEngineTest is StdCheats, Test {
      }
  
      function testRevertsWithUnapprovedCollateral() public {
@@ -431,114 +431,114 @@ index f697f8d..dc2de7d 100644
 +        ERC20DecimalsMock randToken = new ERC20DecimalsMock("RAN", "RAN", 4);
 +        ERC20DecimalsMock(randToken).mint(user, 100 ether);
          vm.startPrank(user);
-         vm.expectRevert(DSCEngine.DSCEngine__NotAllowedToken.selector);
-         dsce.depositCollateral(address(randToken), amountCollateral);
-@@ -145,7 +166,7 @@ contract DSCEngineTest is StdCheats, Test {
+         vm.expectRevert(TSCEngine.TSCEngine__NotAllowedToken.selector);
+         TSCe.depositCollateral(address(randToken), amountCollateral);
+@@ -145,7 +166,7 @@ contract TSCEngineTest is StdCheats, Test {
  
      modifier depositedCollateral() {
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(dsce), amountCollateral);
-         dsce.depositCollateral(weth, amountCollateral);
+-        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(TSCe), amountCollateral);
+         TSCe.depositCollateral(weth, amountCollateral);
          vm.stopPrank();
          _;
-@@ -182,7 +203,7 @@ contract DSCEngineTest is StdCheats, Test {
-         mockDsc.transferOwnership(address(mockDsce));
+@@ -182,7 +203,7 @@ contract TSCEngineTest is StdCheats, Test {
+         mockTSC.transferOwnership(address(mockTSCe));
          // Arrange - User
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(mockDsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(mockDsce), amountCollateral);
+-        ERC20Mock(weth).approve(address(mockTSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(mockTSCe), amountCollateral);
  
-         vm.expectRevert(DSCEngine.DSCEngine__MintFailed.selector);
-         mockDsce.depositCollateralAndMintDsc(weth, amountCollateral, amountToMint);
-@@ -193,7 +214,7 @@ contract DSCEngineTest is StdCheats, Test {
+         vm.expectRevert(TSCEngine.TSCEngine__MintFailed.selector);
+         mockTSCe.depositCollateralAndMintTSC(weth, amountCollateral, amountToMint);
+@@ -193,7 +214,7 @@ contract TSCEngineTest is StdCheats, Test {
          (, int256 price,,,) = MockV3Aggregator(ethUsdPriceFeed).latestRoundData();
-         amountToMint = (amountCollateral * (uint256(price) * dsce.getAdditionalFeedPrecision())) / dsce.getPrecision();
+         amountToMint = (amountCollateral * (uint256(price) * TSCe.getAdditionalFeedPrecision())) / TSCe.getPrecision();
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(dsce), amountCollateral);
+-        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(TSCe), amountCollateral);
  
          uint256 expectedHealthFactor =
-             dsce.calculateHealthFactor(dsce.getUsdValue(weth, amountCollateral), amountToMint);
-@@ -204,7 +225,7 @@ contract DSCEngineTest is StdCheats, Test {
+             TSCe.calculateHealthFactor(TSCe.getUsdValue(weth, amountCollateral), amountToMint);
+@@ -204,7 +225,7 @@ contract TSCEngineTest is StdCheats, Test {
  
-     modifier depositedCollateralAndMintedDsc() {
+     modifier depositedCollateralAndMintedTSC() {
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(dsce), amountCollateral);
-         dsce.depositCollateralAndMintDsc(weth, amountCollateral, amountToMint);
+-        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(TSCe), amountCollateral);
+         TSCe.depositCollateralAndMintTSC(weth, amountCollateral, amountToMint);
          vm.stopPrank();
          _;
-@@ -221,7 +242,7 @@ contract DSCEngineTest is StdCheats, Test {
+@@ -221,7 +242,7 @@ contract TSCEngineTest is StdCheats, Test {
  
      function testRevertsIfMintAmountIsZero() public {
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(dsce), amountCollateral);
-         dsce.depositCollateralAndMintDsc(weth, amountCollateral, amountToMint);
-         vm.expectRevert(DSCEngine.DSCEngine__NeedsMoreThanZero.selector);
-         dsce.mintDsc(0);
-@@ -235,7 +256,7 @@ contract DSCEngineTest is StdCheats, Test {
-         amountToMint = (amountCollateral * (uint256(price) * dsce.getAdditionalFeedPrecision())) / dsce.getPrecision();
+-        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(TSCe), amountCollateral);
+         TSCe.depositCollateralAndMintTSC(weth, amountCollateral, amountToMint);
+         vm.expectRevert(TSCEngine.TSCEngine__NeedsMoreThanZero.selector);
+         TSCe.mintTSC(0);
+@@ -235,7 +256,7 @@ contract TSCEngineTest is StdCheats, Test {
+         amountToMint = (amountCollateral * (uint256(price) * TSCe.getAdditionalFeedPrecision())) / TSCe.getPrecision();
  
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(dsce), amountCollateral);
-         dsce.depositCollateral(weth, amountCollateral);
+-        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(TSCe), amountCollateral);
+         TSCe.depositCollateral(weth, amountCollateral);
  
          uint256 expectedHealthFactor =
-@@ -259,7 +280,7 @@ contract DSCEngineTest is StdCheats, Test {
+@@ -259,7 +280,7 @@ contract TSCEngineTest is StdCheats, Test {
  
      function testRevertsIfBurnAmountIsZero() public {
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(dsce), amountCollateral);
-         dsce.depositCollateralAndMintDsc(weth, amountCollateral, amountToMint);
-         vm.expectRevert(DSCEngine.DSCEngine__NeedsMoreThanZero.selector);
-         dsce.burnDsc(0);
-@@ -306,7 +327,7 @@ contract DSCEngineTest is StdCheats, Test {
-         mockDsc.transferOwnership(address(mockDsce));
+-        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(TSCe), amountCollateral);
+         TSCe.depositCollateralAndMintTSC(weth, amountCollateral, amountToMint);
+         vm.expectRevert(TSCEngine.TSCEngine__NeedsMoreThanZero.selector);
+         TSCe.burnTSC(0);
+@@ -306,7 +327,7 @@ contract TSCEngineTest is StdCheats, Test {
+         mockTSC.transferOwnership(address(mockTSCe));
          // Arrange - User
          vm.startPrank(user);
--        ERC20Mock(address(mockDsc)).approve(address(mockDsce), amountCollateral);
-+        ERC20DecimalsMock(address(mockDsc)).approve(address(mockDsce), amountCollateral);
+-        ERC20Mock(address(mockTSC)).approve(address(mockTSCe), amountCollateral);
++        ERC20DecimalsMock(address(mockTSC)).approve(address(mockTSCe), amountCollateral);
          // Act / Assert
-         mockDsce.depositCollateral(address(mockDsc), amountCollateral);
-         vm.expectRevert(DSCEngine.DSCEngine__TransferFailed.selector);
-@@ -316,7 +337,7 @@ contract DSCEngineTest is StdCheats, Test {
+         mockTSCe.depositCollateral(address(mockTSC), amountCollateral);
+         vm.expectRevert(TSCEngine.TSCEngine__TransferFailed.selector);
+@@ -316,7 +337,7 @@ contract TSCEngineTest is StdCheats, Test {
  
      function testRevertsIfRedeemAmountIsZero() public {
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(dsce), amountCollateral);
-         dsce.depositCollateralAndMintDsc(weth, amountCollateral, amountToMint);
-         vm.expectRevert(DSCEngine.DSCEngine__NeedsMoreThanZero.selector);
-         dsce.redeemCollateral(weth, 0);
-@@ -326,7 +347,7 @@ contract DSCEngineTest is StdCheats, Test {
+-        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(TSCe), amountCollateral);
+         TSCe.depositCollateralAndMintTSC(weth, amountCollateral, amountToMint);
+         vm.expectRevert(TSCEngine.TSCEngine__NeedsMoreThanZero.selector);
+         TSCe.redeemCollateral(weth, 0);
+@@ -326,7 +347,7 @@ contract TSCEngineTest is StdCheats, Test {
      function testCanRedeemCollateral() public depositedCollateral {
          vm.startPrank(user);
-         dsce.redeemCollateral(weth, amountCollateral);
+         TSCe.redeemCollateral(weth, amountCollateral);
 -        uint256 userBalance = ERC20Mock(weth).balanceOf(user);
 +        uint256 userBalance = ERC20DecimalsMock(weth).balanceOf(user);
          assertEq(userBalance, amountCollateral);
          vm.stopPrank();
      }
-@@ -345,7 +366,7 @@ contract DSCEngineTest is StdCheats, Test {
+@@ -345,7 +366,7 @@ contract TSCEngineTest is StdCheats, Test {
  
      function testCanRedeemDepositedCollateral() public {
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(dsce), amountCollateral);
-         dsce.depositCollateralAndMintDsc(weth, amountCollateral, amountToMint);
-         dsc.approve(address(dsce), amountToMint);
-         dsce.redeemCollateralForDsc(weth, amountCollateral, amountToMint);
-@@ -399,16 +420,16 @@ contract DSCEngineTest is StdCheats, Test {
-         mockDsc.transferOwnership(address(mockDsce));
+-        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(TSCe), amountCollateral);
+         TSCe.depositCollateralAndMintTSC(weth, amountCollateral, amountToMint);
+         TSC.approve(address(TSCe), amountToMint);
+         TSCe.redeemCollateralForTSC(weth, amountCollateral, amountToMint);
+@@ -399,16 +420,16 @@ contract TSCEngineTest is StdCheats, Test {
+         mockTSC.transferOwnership(address(mockTSCe));
          // Arrange - User
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(mockDsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(mockDsce), amountCollateral);
-         mockDsce.depositCollateralAndMintDsc(weth, amountCollateral, amountToMint);
+-        ERC20Mock(weth).approve(address(mockTSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(mockTSCe), amountCollateral);
+         mockTSCe.depositCollateralAndMintTSC(weth, amountCollateral, amountToMint);
          vm.stopPrank();
  
          // Arrange - Liquidator
@@ -547,73 +547,73 @@ index f697f8d..dc2de7d 100644
 +        ERC20DecimalsMock(weth).mint(liquidator, collateralToCover);
  
          vm.startPrank(liquidator);
--        ERC20Mock(weth).approve(address(mockDsce), collateralToCover);
-+        ERC20DecimalsMock(weth).approve(address(mockDsce), collateralToCover);
+-        ERC20Mock(weth).approve(address(mockTSCe), collateralToCover);
++        ERC20DecimalsMock(weth).approve(address(mockTSCe), collateralToCover);
          uint256 debtToCover = 10 ether;
-         mockDsce.depositCollateralAndMintDsc(weth, collateralToCover, amountToMint);
-         mockDsc.approve(address(mockDsce), debtToCover);
-@@ -422,10 +443,10 @@ contract DSCEngineTest is StdCheats, Test {
+         mockTSCe.depositCollateralAndMintTSC(weth, collateralToCover, amountToMint);
+         mockTSC.approve(address(mockTSCe), debtToCover);
+@@ -422,10 +443,10 @@ contract TSCEngineTest is StdCheats, Test {
      }
  
-     function testCantLiquidateGoodHealthFactor() public depositedCollateralAndMintedDsc {
+     function testCantLiquidateGoodHealthFactor() public depositedCollateralAndMintedTSC {
 -        ERC20Mock(weth).mint(liquidator, collateralToCover);
 +        ERC20DecimalsMock(weth).mint(liquidator, collateralToCover);
  
          vm.startPrank(liquidator);
--        ERC20Mock(weth).approve(address(dsce), collateralToCover);
-+        ERC20DecimalsMock(weth).approve(address(dsce), collateralToCover);
-         dsce.depositCollateralAndMintDsc(weth, collateralToCover, amountToMint);
-         dsc.approve(address(dsce), amountToMint);
+-        ERC20Mock(weth).approve(address(TSCe), collateralToCover);
++        ERC20DecimalsMock(weth).approve(address(TSCe), collateralToCover);
+         TSCe.depositCollateralAndMintTSC(weth, collateralToCover, amountToMint);
+         TSC.approve(address(TSCe), amountToMint);
  
-@@ -436,7 +457,7 @@ contract DSCEngineTest is StdCheats, Test {
+@@ -436,7 +457,7 @@ contract TSCEngineTest is StdCheats, Test {
  
      modifier liquidated() {
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(dsce), amountCollateral);
-         dsce.depositCollateralAndMintDsc(weth, amountCollateral, amountToMint);
+-        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(TSCe), amountCollateral);
+         TSCe.depositCollateralAndMintTSC(weth, amountCollateral, amountToMint);
          vm.stopPrank();
          int256 ethUsdUpdatedPrice = 18e8; // 1 ETH = $18
-@@ -444,10 +465,10 @@ contract DSCEngineTest is StdCheats, Test {
+@@ -444,10 +465,10 @@ contract TSCEngineTest is StdCheats, Test {
          MockV3Aggregator(ethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
-         uint256 userHealthFactor = dsce.getHealthFactor(user);
+         uint256 userHealthFactor = TSCe.getHealthFactor(user);
  
 -        ERC20Mock(weth).mint(liquidator, collateralToCover);
 +        ERC20DecimalsMock(weth).mint(liquidator, collateralToCover);
  
          vm.startPrank(liquidator);
--        ERC20Mock(weth).approve(address(dsce), collateralToCover);
-+        ERC20DecimalsMock(weth).approve(address(dsce), collateralToCover);
-         dsce.depositCollateralAndMintDsc(weth, collateralToCover, amountToMint);
-         dsc.approve(address(dsce), amountToMint);
-         dsce.liquidate(weth, user, amountToMint); // We are covering their whole debt
-@@ -456,7 +477,7 @@ contract DSCEngineTest is StdCheats, Test {
+-        ERC20Mock(weth).approve(address(TSCe), collateralToCover);
++        ERC20DecimalsMock(weth).approve(address(TSCe), collateralToCover);
+         TSCe.depositCollateralAndMintTSC(weth, collateralToCover, amountToMint);
+         TSC.approve(address(TSCe), amountToMint);
+         TSCe.liquidate(weth, user, amountToMint); // We are covering their whole debt
+@@ -456,7 +477,7 @@ contract TSCEngineTest is StdCheats, Test {
      }
  
      function testLiquidationPayoutIsCorrect() public liquidated {
 -        uint256 liquidatorWethBalance = ERC20Mock(weth).balanceOf(liquidator);
 +        uint256 liquidatorWethBalance = ERC20DecimalsMock(weth).balanceOf(liquidator);
-         uint256 expectedWeth = dsce.getTokenAmountFromUsd(weth, amountToMint)
-             + (dsce.getTokenAmountFromUsd(weth, amountToMint) / dsce.getLiquidationBonus());
+         uint256 expectedWeth = TSCe.getTokenAmountFromUsd(weth, amountToMint)
+             + (TSCe.getTokenAmountFromUsd(weth, amountToMint) / TSCe.getLiquidationBonus());
          uint256 hardCodedExpected = 6111111111111111110;
-@@ -519,7 +540,7 @@ contract DSCEngineTest is StdCheats, Test {
+@@ -519,7 +540,7 @@ contract TSCEngineTest is StdCheats, Test {
  
      function testGetCollateralBalanceOfUser() public {
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(dsce), amountCollateral);
-         dsce.depositCollateral(weth, amountCollateral);
+-        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(TSCe), amountCollateral);
+         TSCe.depositCollateral(weth, amountCollateral);
          vm.stopPrank();
-         uint256 collateralBalance = dsce.getCollateralBalanceOfUser(user, weth);
-@@ -528,7 +549,7 @@ contract DSCEngineTest is StdCheats, Test {
+         uint256 collateralBalance = TSCe.getCollateralBalanceOfUser(user, weth);
+@@ -528,7 +549,7 @@ contract TSCEngineTest is StdCheats, Test {
  
      function testGetAccountCollateralValue() public {
          vm.startPrank(user);
--        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-+        ERC20DecimalsMock(weth).approve(address(dsce), amountCollateral);
-         dsce.depositCollateral(weth, amountCollateral);
+-        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
++        ERC20DecimalsMock(weth).approve(address(TSCe), amountCollateral);
+         TSCe.depositCollateral(weth, amountCollateral);
          vm.stopPrank();
-         uint256 collateralValue = dsce.getAccountCollateralValue(user);
+         uint256 collateralValue = TSCe.getAccountCollateralValue(user);
 ```
 ## <a id='H-02'></a>H-02. Liquidation Is Prevented Due To Strict Implementation of Liqudation Bonus
 
@@ -621,7 +621,7 @@ _Submitted by [Bobface](/profile/clk572bex000wl5082nhslxbq), [carrotsmuggler](/p
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L229-L262
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L229-L262
 
 ## Summary
 
@@ -663,7 +663,7 @@ When the collateral is less than 1.1 times of the debt, Alice cannot pay the ful
 
 This problem is more probable since this protocol can use multiple types of collateral. One collateral may crash and use its value, and the user's health factor reaches 100 to 110%. The liquidators should liquidate this user completely using the other collateral; however, this will not happen.
 
-For example, consider Alice deposits 105$ of WETH and 95$ of WBTC. Also, Alice mints 100$ of DSC. Now, their health factor is more than `MIN_HEALTH_FACTOR`. Now, consider WBTC crashes and its value reaches 0. Now, Alice has 105$ of WETH collateral and 100$ of DSC debt. Her health factor is way less than `MIN_HEALTH_FACTOR`. Also, she is over-collateralized. However, no liquidator can send 100$ of DSC to receive 105$ of WETH; however, they can send ~95$ of DSC to receive 105$ of WETH. However, after that, the health factor is not going to be improved and the transaction is going to be reverted again. Hence, when the over-collateralized ratio is between 1 to 1.1, the user is never get liquidated.
+For example, consider Alice deposits 105$ of WETH and 95$ of WBTC. Also, Alice mints 100$ of TSC. Now, their health factor is more than `MIN_HEALTH_FACTOR`. Now, consider WBTC crashes and its value reaches 0. Now, Alice has 105$ of WETH collateral and 100$ of TSC debt. Her health factor is way less than `MIN_HEALTH_FACTOR`. Also, she is over-collateralized. However, no liquidator can send 100$ of TSC to receive 105$ of WETH; however, they can send ~95$ of TSC to receive 105$ of WETH. However, after that, the health factor is not going to be improved and the transaction is going to be reverted again. Hence, when the over-collateralized ratio is between 1 to 1.1, the user is never get liquidated.
 
 Executed the test below:
 
@@ -673,10 +673,10 @@ function testCriticalHealthFactor() public {
     uint256 liquidatorCollateral = 10e18;
     ERC20Mock(weth).mint(liquidator, liquidatorCollateral);
     vm.startPrank(liquidator);
-    ERC20Mock(weth).approve(address(dsce), liquidatorCollateral);
+    ERC20Mock(weth).approve(address(TSCe), liquidatorCollateral);
     uint256 liquidatorDebtToCover = 200e18;
-    dsce.depositCollateralAndMintDsc(weth, liquidatorCollateral, amountToMint);
-    dsc.approve(address(dsce), liquidatorDebtToCover);
+    TSCe.depositCollateralAndMintTSC(weth, liquidatorCollateral, amountToMint);
+    TSC.approve(address(TSCe), liquidatorDebtToCover);
     vm.stopPrank();
 
     // We set the price of WETH to $105 and WBTC to $95
@@ -685,15 +685,15 @@ function testCriticalHealthFactor() public {
     int256 wbtcUsdPrice = 95e8;
     MockV3Aggregator(btcUsdPriceFeed).updateAnswer(wbtcUsdPrice);
 
-    // Alice deposits 1 WBTC and 1 WETH and mints 100 DSC
+    // Alice deposits 1 WBTC and 1 WETH and mints 100 TSC
     uint256 amountWethToDeposit = 1e18;
     uint256 amountWbtcToDeposit = 1e18;
-    uint256 amountDscToMint = 100e18;
+    uint256 amountTSCToMint = 100e18;
     vm.startPrank(user);
-    ERC20Mock(weth).approve(address(dsce), amountWbtcToDeposit);
-    dsce.depositCollateral(weth, amountWbtcToDeposit);
-    ERC20Mock(wbtc).approve(address(dsce), amountWethToDeposit);
-    dsce.depositCollateralAndMintDsc(wbtc, amountWethToDeposit, amountDscToMint);
+    ERC20Mock(weth).approve(address(TSCe), amountWbtcToDeposit);
+    TSCe.depositCollateral(weth, amountWbtcToDeposit);
+    ERC20Mock(wbtc).approve(address(TSCe), amountWethToDeposit);
+    TSCe.depositCollateralAndMintTSC(wbtc, amountWethToDeposit, amountTSCToMint);
 
     // WBTC crashes in its price will be $0
     int256 wbtcUsdPriceAfterCrash = 0;
@@ -702,14 +702,14 @@ function testCriticalHealthFactor() public {
     // Now, a liquidator tries to liquidate $100 of Alice's debt, and it will be reverted.
     vm.expectRevert();
     vm.startPrank(liquidator);
-    dsce.liquidate(weth, user, amountDscToMint);
+    TSCe.liquidate(weth, user, amountTSCToMint);
     vm.stopPrank();
 
     // The liquidator tries to liquidate $94.5 of Alice's debt, and it will be reverted.
     uint256 maxValueToLiquidate = 94.5e18;
     vm.expectRevert();
     vm.startPrank(liquidator);
-    dsce.liquidate(weth, user, maxValueToLiquidate);
+    TSCe.liquidate(weth, user, maxValueToLiquidate);
     vm.stopPrank();
 }
 ```
@@ -742,18 +742,18 @@ _Submitted by [kutu](/profile/clk7qwwzw001gm9088xsr6a22), [rvierdiiev](/profile/
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L229-L262
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L229-L262
 
 ## Summary
 there is no incentive to liquidate low value accounts such as 5$ usd value accounts because of gas cost
 ## Vulnerability Details
-Liquidators liquidate users for the profit they can make. If there is no profit to be made than there will be no one to call the liquidate function. For example an account has 6$ worth of collateral and has 4 DSC minted. This user is undercollateralized and must be liquidated in order to ensure that the protocol remains overcollateralized. Because the value of the account is so low, after gas costs, liquidators will not make a profit liquidating this user. In the end these low value accounts will never get liquidating, leaving the protocol with bad debt and can even cause the protocol to be undercollateralized with enough small value accounts being underwater.
+Liquidators liquidate users for the profit they can make. If there is no profit to be made than there will be no one to call the liquidate function. For example an account has 6$ worth of collateral and has 4 TSC minted. This user is undercollateralized and must be liquidated in order to ensure that the protocol remains overcollateralized. Because the value of the account is so low, after gas costs, liquidators will not make a profit liquidating this user. In the end these low value accounts will never get liquidating, leaving the protocol with bad debt and can even cause the protocol to be undercollateralized with enough small value accounts being underwater.
 ## Impact
-The protocol can be undercollateralized potentially not allowing users to redeem their DSC for its value, complete loss of funds.
+The protocol can be undercollateralized potentially not allowing users to redeem their TSC for its value, complete loss of funds.
 ## Tools Used
 manual review
 ## Recommendations
-A potential fix could be to only allow users to mint DSC if their collateral value is past a certain threshold.
+A potential fix could be to only allow users to mint TSC if their collateral value is past a certain threshold.
 ## <a id='H-04'></a>H-04. Business Logic: Protocol Liquidation Arithmetic
 
 _Submitted by [0xRstStn](/profile/clkmd5uls000ol008espu3dih), [usmanfarooq90](/profile/clk47y2ey0038la088eca1es3), [0xPublicGoods](/profile/clk56xif80002l208nv5vsvln). Selected submission by: [0xPublicGoods](/profile/clk56xif80002l208nv5vsvln)._      
@@ -763,34 +763,34 @@ _Submitted by [0xRstStn](/profile/clkmd5uls000ol008espu3dih), [usmanfarooq90](/p
 ## Summary
 The protocol mints a stable coin based on the value of collateral tokens it accepts. The only way to mint this stable coin is through this contract.
 
-To liquidate a users position in order to save the protocol from holding bad debt, the liquidator needs to pay back the dsc owed by the user that has a position at risk.
+To liquidate a users position in order to save the protocol from holding bad debt, the liquidator needs to pay back the TSC owed by the user that has a position at risk.
 
-In order for the liquidator to get this dsc, they would need to mint new dsc from the contract. But the math does not work out.
+In order for the liquidator to get this TSC, they would need to mint new TSC from the contract. But the math does not work out.
 
 With a Liquidation Bonus of 10% and an Over Collateralization Rate of 200%, a liquidator will always have their own collateral stuck in the protocol after liquidating a user.
 
-This happens even if the liquidator is able to use the redeemed collateral to mint new dsc and pay back the users debt - should a way for this to be done atomically be available.
+This happens even if the liquidator is able to use the redeemed collateral to mint new TSC and pay back the users debt - should a way for this to be done atomically be available.
 
 This also happens if they are able to purchase it or flashloan it from a dex or other venue prior to calling liquidate.
 
 The math simply does not work.
 
 ## Vulnerability Details
-The Liquidation Incentives and the Collateralization Rate make it near impossible to liquidate any under collateralized positions without being the newest user of the protocol, whose position is now also at risk because the dsc has been spent.
+The Liquidation Incentives and the Collateralization Rate make it near impossible to liquidate any under collateralized positions without being the newest user of the protocol, whose position is now also at risk because the TSC has been spent.
 
 ## Impact
 Liquidators would not call liquidate. The protocol would suffer insolvency in adverse market conditions due to no liquidations taking place.
 
-Furthermore, users after having done their homework may not want to enter the protocol at all due to its design of needing to have all debt returned in dsc - and without other incentives at play, dsc will probably be converted into an alternative token and we will have dsc dust forever in the wild, never to be able to redeem collateral again.
+Furthermore, users after having done their homework may not want to enter the protocol at all due to its design of needing to have all debt returned in TSC - and without other incentives at play, TSC will probably be converted into an alternative token and we will have TSC dust forever in the wild, never to be able to redeem collateral again.
 
 ## Tools Used
 Manual Review
 
 ## Recommendations
 These are not all connected, but possibly can be:
-1. Design some incentives for users to keep using dsc and not sell it, so that they may be able to redeem their collateral.
+1. Design some incentives for users to keep using TSC and not sell it, so that they may be able to redeem their collateral.
 2. Make the collateralization rate and the liquidation bonus arithmetically incentivised so as to allow re-entrancy for a flash loan type of atomic mint within the protocol.
-3. Allow an alternative stable coin to be used for repayment should dsc not be available.
+3. Allow an alternative stable coin to be used for repayment should TSC not be available.
 4. Allow a flashmint feature in the Decentralised Stablecoin Contract for no fee, but limited to the value of the redeemed Collateral held at time of flashmint and pay back.
 
 # Medium Risk Findings
@@ -844,7 +844,7 @@ require(isSequencerAlive(), "Sequencer is down");
        ....//remaining parts of the function
 ```
 
-## <a id='M-02'></a>M-02. DSC protocol can consume stale price data or cannot operate on some EVM chains
+## <a id='M-02'></a>M-02. TSC protocol can consume stale price data or cannot operate on some EVM chains
 
 _Submitted by [kutu](/profile/clk7qwwzw001gm9088xsr6a22), [dacian](/profile/clk6xnjxv0008jy083fc2mhsb), [AcT3R](/profile/clkcezo400004jq08spgxakhk), [0xAxe](/profile/clk43mzqn009wmb08j8o79bfh), [StErMi](/profile/clk579hcp0014l508ybc3ec6z), [pacelliv](/profile/clk45g5zs003smg08s6utu2a0), [Breeje](/profile/clk41ow6c0066la0889fuw52t), [sobieski](/profile/clk7551e0001ol408rl4fyi5s), [T1MOH](/profile/clk8mb22u001smg085mix29s8), [n1punp](/profile/clk6bmca40000mu080urrlhqi), [crippie](/profile/clkitmhs50000l508e5tvl2w2), [Polaristow](/profile/clk40hl6t000wmb08y3268i63), [alymurtazamemon](/profile/clk3q1mog0000jr082dc9tipk), [rvierdiiev](/profile/clk48xt1x005yl50815kr7bpc), [ss3434](/profile/clkjlzdd00028mm08xrtvvbp5), [aviggiano](/profile/clk3yu8m7001kjq08r9a7wgsh), [BenRai](/profile/clkksmnp8000sla08ob285wxl), [P12473](/profile/clk6kv9cw000kld08aoojapp0), [chainNue](/profile/clkceb0jn000ol8082eekhkg8), [t0x1c](/profile/clk7rcevn0004jn08o2n2g1a5), [devival](/profile/clk87smah000kl708ybyqinyl), [Bauchibred](/profile/clk9ibj6p0002mh08c603lr2j), [Shogoki](/profile/clk41btup004qla08w6tg0mnp), [Y403L](/profile/clk451ae6001gl908aibvhwv9), [kz0213871](/profile/clk9oqssu0008me08w56bq8n4), [cRat1st0s](/profile/clk40jnqb003ela082lym3lj7), [aak](/profile/clk9kvsmw000aih08ru3t39en), [golanger85](/profile/clk9gmt880000mj08xc8hw7ng), [BLACK PANDA REACH](/team/clkgk6w82000djx09cwpz55ro), [serialcoder](/profile/clkb309g90008l208so2bzcy6), [iroh](/profile/clk8luozk001omg081ih518e3), [ni8mare](/profile/clk3xgimw001mmf08gkbh3jbm), [Kresh](/profile/clk793io00000mq08mnijuadg). Selected submission by: [serialcoder](/profile/clkb309g90008l208so2bzcy6)._      
 				
@@ -856,13 +856,13 @@ https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0
 
 ## Summary
 
-The stale period (3 hours) is too large for Ethereum, Polygon, BNB, and Optimism chains, leading to consuming stale price data. On the other hand, that period is too small for Arbitrum and Avalanche chains, rendering the DSC protocol unable to operate.
+The stale period (3 hours) is too large for Ethereum, Polygon, BNB, and Optimism chains, leading to consuming stale price data. On the other hand, that period is too small for Arbitrum and Avalanche chains, rendering the TSC protocol unable to operate.
 
 ## Vulnerability Details
 
 In the `OracleLib` library, the [`TIMEOUT` constant is set to *3 hours*](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/libraries/OracleLib.sol#L19). In other words, the `staleCheckLatestRoundData()` would consider the price data fed by Chainlink's price feed aggregators to be stale only after the last update time has elapsed *3 hours*.
 
-Since the DSC protocol supports every EVM chain (confirmed by the client), let's consider the `ETH / USD oracles` on different chains.
+Since the TSC protocol supports every EVM chain (confirmed by the client), let's consider the `ETH / USD oracles` on different chains.
 - On Ethereum, the oracle will update the price data [every ~1 hour](https://data.chain.link/ethereum/mainnet/crypto-usd/eth-usd).
 - On Polygon, the oracle will update the price data [every ~25 seconds](https://data.chain.link/polygon/mainnet/crypto-usd/eth-usd).
 - On BNB (BSC), the oracle will update the price data [every ~60 seconds](https://data.chain.link/bsc/mainnet/crypto-usd/eth-usd).
@@ -872,7 +872,7 @@ Since the DSC protocol supports every EVM chain (confirmed by the client), let's
 
 On some chains such as Ethereum, Polygon, BNB, and Optimism, *3 hours* can be considered too large for the stale period, causing the `staleCheckLatestRoundData()` to return stale price data.
 
-Whereas, on some chains, such as Arbitrum and Avalanche, *3 hours* is too small. Specifically, if the DSC protocol is deployed to Arbitrum or Avalanche, the protocol will be unable to operate because the ["`if (secondsSince > TIMEOUT)`" condition will be met](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/libraries/OracleLib.sol#L30), causing a transaction to be reverted in the `staleCheckLatestRoundData()`.
+Whereas, on some chains, such as Arbitrum and Avalanche, *3 hours* is too small. Specifically, if the TSC protocol is deployed to Arbitrum or Avalanche, the protocol will be unable to operate because the ["`if (secondsSince > TIMEOUT)`" condition will be met](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/libraries/OracleLib.sol#L30), causing a transaction to be reverted in the `staleCheckLatestRoundData()`.
 
 ```solidity
     // ...SNIPPED...
@@ -900,9 +900,9 @@ Whereas, on some chains, such as Arbitrum and Avalanche, *3 hours* is too small.
 
 ## Impact
 
-Setting the stale period (`TIMEOUT` constant) too large could lead to incorrect reporting of prices of collateral tokens. The incorrect prices can cause the DSC protocol's functions (e.g., `mintDsc()`, `burnDsc()`, `redeemCollateral()`, and `liquidate()`) to operate incorrectly, affecting the protocol's disruption.
+Setting the stale period (`TIMEOUT` constant) too large could lead to incorrect reporting of prices of collateral tokens. The incorrect prices can cause the TSC protocol's functions (e.g., `mintTSC()`, `burnTSC()`, `redeemCollateral()`, and `liquidate()`) to operate incorrectly, affecting the protocol's disruption.
 
-On the other hand, setting the stale period too small could render the DSC protocol unable to operate.
+On the other hand, setting the stale period too small could render the TSC protocol unable to operate.
 
 ## Tools Used
 
@@ -949,20 +949,20 @@ The `staleCheckLatestRoundData` function in `OracleLib.sol` is only checking for
 [[21](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/libraries/OracleLib.sol#L21C4-L33C6)]
 
 There is no function for checking only this as well in the library.
-The checks are not done in `DSCEngine.sol` file.
+The checks are not done in `TSCEngine.sol` file.
 There are two instances of that:
 ```solidity
         (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
 ```
-[[345](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L345)]
+[[345](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L345)]
 
 ```solidity
         (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
 ```
-[[363](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L363)]
+[[363](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L363)]
 
 ## Impact
-This would allow users to continue mintDsc, burnDsc etc. but at the wrong price. This is exactly what happened to Venus on BSC when LUNA crashed.
+This would allow users to continue mintTSC, burnTSC etc. but at the wrong price. This is exactly what happened to Venus on BSC when LUNA crashed.
 
 ## Tools Used
 chainlink docs, foundry test and previous audit reports
@@ -985,17 +985,17 @@ _Submitted by [BAHOZ](/profile/clk80h9bl000ml6087ltct76r), [dacian](/profile/clk
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L340-L348
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L340-L348
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L361-L367
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L361-L367
 
 ## Summary
 
-`DSCEngine` contract assumes all of the USD pair chinlink price feeds have 8 decimals but there are certain token's USD feed has a different decimals
+`TSCEngine` contract assumes all of the USD pair chinlink price feeds have 8 decimals but there are certain token's USD feed has a different decimals
 
 ## Vulnerability Details
 
-In the [`getTokenAmountFromUsd`](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L340-L348) and [`getUsdValue`](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L361-L367) functions price of tokens are calculated with chainlink price feeds and the function assumed that all of USD pairs has 8 decimals but there are certain tokens which they have different decimals.
+In the [`getTokenAmountFromUsd`](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L340-L348) and [`getUsdValue`](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L361-L367) functions price of tokens are calculated with chainlink price feeds and the function assumed that all of USD pairs has 8 decimals but there are certain tokens which they have different decimals.
 
 For example [AMPL / USD feed](https://etherscan.io/address/0xe20CA8D7546932360e37E9D72c1a47334af57706#readContract) has 18 decimals
  
@@ -1047,11 +1047,11 @@ _Submitted by [BAHOZ](/profile/clk80h9bl000ml6087ltct76r), [LaScaloneta](/team/c
 
 ## Summary
 
-Anyone can burn `DSC` tokens with [`burnFrom`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/0a25c1940ca220686588c4af3ec526f725fe2582/contracts/token/ERC20/extensions/ERC20Burnable.sol#L35-L38) function inherited of **OZ ERC20Burnable** contract
+Anyone can burn `TSC` tokens with [`burnFrom`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/0a25c1940ca220686588c4af3ec526f725fe2582/contracts/token/ERC20/extensions/ERC20Burnable.sol#L35-L38) function inherited of **OZ ERC20Burnable** contract
 
 ## Vulnerability Details
 
-In the **DecentralizedStableCoin** contract the `burn` function is `onlyOwner` and is used by **DSCEngine** contract, which is the owner of **DecentralizedStableCoin** contract
+In the **DecentralizedStableCoin** contract the `burn` function is `onlyOwner` and is used by **TSCEngine** contract, which is the owner of **DecentralizedStableCoin** contract
 
 ## Impact
 
@@ -1068,7 +1068,7 @@ Block the `burnFrom` function of **OZ ERC20Burnable** contract
      error DecentralizedStableCoin__NotZeroAddress();
 +    error DecentralizedStableCoin__BlockFunction();
 
-     constructor() ERC20("DecentralizedStableCoin", "DSC") {}
+     constructor() ERC20("DecentralizedStableCoin", "TSC") {}
 
 @@ -54,6 +55,10 @@ contract DecentralizedStableCoin is ERC20Burnable, Ownable {
          super.burn(_amount);
@@ -1082,41 +1082,41 @@ Block the `burnFrom` function of **OZ ERC20Burnable** contract
          if (_to == address(0)) {
              revert DecentralizedStableCoin__NotZeroAddress();
 ```
-## <a id='M-06'></a>M-06. Double-spending vulnerability leads to a disruption of the DSC token
+## <a id='M-06'></a>M-06. Double-spending vulnerability leads to a disruption of the TSC token
 
 _Submitted by [StErMi](/profile/clk579hcp0014l508ybc3ec6z), [1nc0gn170](/profile/clk9zehwa0000l508h5rx35pc), [0xAxe](/profile/clk43mzqn009wmb08j8o79bfh), [warRoom](/team/clkuq3mcw0001ju08fzp9y8bi), [Y403L](/profile/clk451ae6001gl908aibvhwv9), [RugpullDetector](/profile/clknpmzwp0014l608wk9hflu6), [serialcoder](/profile/clkb309g90008l208so2bzcy6), [pontifex](/profile/clk3xo3e0000omm08i6ehw2ae), [klaus](/profile/clkwlspwi002sk008f6i0bjvu). Selected submission by: [serialcoder](/profile/clkb309g90008l208so2bzcy6)._      
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L120
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L120
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L353-L357
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L353-L357
 
 ## Summary
 
-There is a double-spending vulnerability in the `DSCEngine` contract, leading to a disruption of the DSC token.
+There is a double-spending vulnerability in the `TSCEngine` contract, leading to a disruption of the TSC token.
 
 ## Vulnerability Details
 
-While constructing the `DSCEngine` contract, the whitelisted collateral tokens will be registered along with their corresponding price feed addresses. However, the registration process does not verify that a token cannot be registered twice. 
+While constructing the `TSCEngine` contract, the whitelisted collateral tokens will be registered along with their corresponding price feed addresses. However, the registration process does not verify that a token cannot be registered twice. 
 
 For instance, assume that the ETH address is inputted in the array `tokenAddresses` twice, the ETH address will also be pushed into the array `s_collateralTokens` twice.
 
 ```solidity
-    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
+    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address TSCAddress) {
         // USD Price Feeds
         if (tokenAddresses.length != priceFeedAddresses.length) {
-            revert DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
+            revert TSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
         }
         // For example ETH / USD, BTC / USD, MKR / USD, etc
         for (uint256 i = 0; i < tokenAddresses.length; i++) {
             s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i];
 @>          s_collateralTokens.push(tokenAddresses[i]);
         }
-        i_dsc = DecentralizedStableCoin(dscAddress);
+        i_TSC = DecentralizedStableCoin(TSCAddress);
     }
 ```
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L120
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L120
 
 Subsequently, when the contract executes the `getAccountCollateralValue()` to compute users' collateral value, the function will process on the ETH address twice. In other words, if a user/attacker deposits 10 ETH as collateral, the `getAccountCollateralValue()` will return 20 ETH (in USD value), leading to a double-spending issue.
 
@@ -1132,13 +1132,13 @@ Subsequently, when the contract executes the `getAccountCollateralValue()` to co
         return totalCollateralValueInUsd;
     }
 ```
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L353-L357
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L353-L357
 
 ## Impact
 
-With this double-spending vulnerability, an attacker can deposit ETH to double their collateral value and then mint DSC tokens over the limit (breaking the protocol's health factor invariant).
+With this double-spending vulnerability, an attacker can deposit ETH to double their collateral value and then mint TSC tokens over the limit (breaking the protocol's health factor invariant).
 
-As a result, the `DSCEngine` contract will eventually be insolvent, and the DSC token will then be depegged to $0.
+As a result, the `TSCEngine` contract will eventually be insolvent, and the TSC token will then be depegged to $0.
 
 ## Tools Used
 
@@ -1149,10 +1149,10 @@ Manual Review
 To fix the vulnerability, I recommend adding the `require(s_priceFeeds[tokenAddresses[i]] == address(0), "Collateral token was already set");` to guarantee that there could not be any token ever registered twice.
 
 ```diff
-    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
+    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address TSCAddress) {
         // USD Price Feeds
         if (tokenAddresses.length != priceFeedAddresses.length) {
-            revert DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
+            revert TSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
         }
         // For example ETH / USD, BTC / USD, MKR / USD, etc
         for (uint256 i = 0; i < tokenAddresses.length; i++) {
@@ -1160,7 +1160,7 @@ To fix the vulnerability, I recommend adding the `require(s_priceFeeds[tokenAddr
             s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i];
             s_collateralTokens.push(tokenAddresses[i]);
         }
-        i_dsc = DecentralizedStableCoin(dscAddress);
+        i_TSC = DecentralizedStableCoin(TSCAddress);
     }
 ```
 ## <a id='M-07'></a>M-07. Lack of fallbacks for price feed oracle
@@ -1175,11 +1175,11 @@ https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0
 
 ## Summary
 
-The DSC protocol does not implement fallback solutions for price feed oracle. In case Chainlink's aggregators fail to update price data, the protocol will refuse to liquidate users' positions, leading to the protocol's disruption.
+The TSC protocol does not implement fallback solutions for price feed oracle. In case Chainlink's aggregators fail to update price data, the protocol will refuse to liquidate users' positions, leading to the protocol's disruption.
 
 ## Vulnerability Details
 
-The DSC protocol utilizes the `staleCheckLatestRoundData()` for querying price data of collateral tokens through [Chainlink's price feed aggregators](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/libraries/OracleLib.sol#L26-L27). Nonetheless, if Chainlink's aggregators fail to update the price data, the DSC protocol will not be able to operate. In other words, [the function will revert transactions since the received price data become stale](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/libraries/OracleLib.sol#L30).
+The TSC protocol utilizes the `staleCheckLatestRoundData()` for querying price data of collateral tokens through [Chainlink's price feed aggregators](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/libraries/OracleLib.sol#L26-L27). Nonetheless, if Chainlink's aggregators fail to update the price data, the TSC protocol will not be able to operate. In other words, [the function will revert transactions since the received price data become stale](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/libraries/OracleLib.sol#L30).
 
 ```solidity
     function staleCheckLatestRoundData(AggregatorV3Interface priceFeed)
@@ -1203,9 +1203,9 @@ The DSC protocol utilizes the `staleCheckLatestRoundData()` for querying price d
 
 ## Impact
 
-Without fallback solutions, the DSC protocol will be unable to operate if Chainlink's aggregators fail to update price data. 
+Without fallback solutions, the TSC protocol will be unable to operate if Chainlink's aggregators fail to update price data. 
 
-Consider the scenario that Chainlink's aggregators fail to update price data and collateral tokens' prices dramatically go down, the DSC protocol will refuse to liquidate users' positions. Consequently, the protocol will become insolvent eventually, leading to the protocol's disruption.
+Consider the scenario that Chainlink's aggregators fail to update price data and collateral tokens' prices dramatically go down, the TSC protocol will refuse to liquidate users' positions. Consequently, the protocol will become insolvent eventually, leading to the protocol's disruption.
 
 ## Tools Used
 
@@ -1214,22 +1214,22 @@ Manual Review
 ## Recommendations
 
 I recommend implementing fallback solutions, such as using other off-chain oracle providers and/or on-chain Uniswap's TWAP, for feeding price data in case Chainlink's aggregators fail.
-## <a id='M-08'></a>M-08. Too many DSC tokens can get minted for fee-on-transfer tokens.
+## <a id='M-08'></a>M-08. Too many TSC tokens can get minted for fee-on-transfer tokens.
 
 _Submitted by [GoSoul22](/profile/clk7zkyd70002l608iam3ggtg), [Bobface](/profile/clk572bex000wl5082nhslxbq), [Madalad](/profile/clki3uj3i0000l508carwkhuh), [Breeje](/profile/clk41ow6c0066la0889fuw52t), [33audits](/profile/clkh3zf810018mi08yjzuvbu1), [rvierdiiev](/profile/clk48xt1x005yl50815kr7bpc), [Dliteofficial](/profile/clk40ntj2001mmb08zbxnflu4), [toshii](/profile/clkkffr6v0008mm0866fnnu0a), [ADM](/profile/clk4kalbm0008l508td2elpga), [Phantasmagoria](/profile/clki6y71n000gkx088cowa4hq), [P12473](/profile/clk6kv9cw000kld08aoojapp0), [Bauchibred](/profile/clk9ibj6p0002mh08c603lr2j), [t0x1c](/profile/clk7rcevn0004jn08o2n2g1a5), [said017](/profile/clk3uzcop000ilb08pak3rnii), [tsvetanovv](/profile/clk3x0ilz001ol808l9uu6vpj), [ptsanev](/profile/clk41ds6d0056la0868j7rf0l), [ZanyBonzy](/profile/clk9uu45r0000js08lnm9zbez), [alymurtazamemon](/profile/clk3q1mog0000jr082dc9tipk), [RugpullDetector](/profile/clknpmzwp0014l608wk9hflu6), [No12Samurai](/profile/clk7mu64b000cme08wadtt1f6), [golanger85](/profile/clk9gmt880000mj08xc8hw7ng), [Deathstore](/profile/clkglvxbj0006ms089kunsfuw), [Kose](/profile/clk3whc2g0000mg08zp13lp1p), [Tripathi](/profile/clk3xe9tk0024l808xjc9wkg4), [xfu](/profile/clke2oift0000l508j03apihy), [alexzoid](/profile/clk41t0lv006kla08p69ueiel), [Kresh](/profile/clk793io00000mq08mnijuadg), [mau](/profile/clk9v1fgt0008mn08czddr9to), [tsar](/profile/clk9isayj0004l30847ln1e8j), [owade](/profile/clk9j4mf20002mi08k4758eni). Selected submission by: [Bobface](/profile/clk572bex000wl5082nhslxbq)._      
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L149-L161
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L149-L161
 
 ## Summary
-The `DSCEngine` contract overcalculates the collateral when operating with fee-on-transfer tokens, which can lead to too many `DSC` tokens being minted.
+The `TSCEngine` contract overcalculates the collateral when operating with fee-on-transfer tokens, which can lead to too many `TSC` tokens being minted.
 
 
 ## Vulnerability Details
-The competition description mentions that while the first use-case for the system will be a WETH/WBTC backed stablecoin, the system is supposed to generally work with **any** collateral tokens. If one or more collateral tokens are fee-on-transfer tokens, i.e., when transferring `X` tokens, only `X - F` tokens arrive at the recipient side, where `F` denotes the transfer fee, depositors get credited too much collateral, meaning more `DSC` tokens can get minted, which leads to a potential depeg.
+The competition description mentions that while the first use-case for the system will be a WETH/WBTC backed stablecoin, the system is supposed to generally work with **any** collateral tokens. If one or more collateral tokens are fee-on-transfer tokens, i.e., when transferring `X` tokens, only `X - F` tokens arrive at the recipient side, where `F` denotes the transfer fee, depositors get credited too much collateral, meaning more `TSC` tokens can get minted, which leads to a potential depeg.
 
-The root cause is the `depositCollateral` function in `DSCEngine`:
+The root cause is the `depositCollateral` function in `TSCEngine`:
 
 ```solidity
 function depositCollateral(address tokenCollateralAddress, uint256 amountCollateral)
@@ -1242,7 +1242,7 @@ function depositCollateral(address tokenCollateralAddress, uint256 amountCollate
         emit CollateralDeposited(msg.sender, tokenCollateralAddress, amountCollateral);
         bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(this), amountCollateral);
         if (!success) {
-            revert DSCEngine__TransferFailed();
+            revert TSCEngine__TransferFailed();
         }
     }
 ```
@@ -1254,7 +1254,7 @@ bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(t
 the contract assumes that the full `amountCollateral` is received, which might not be the case with fee-on-transfer tokens.
 
 ## Impact
-When the contract operates with fee-on-transfer tokens as collateral, too many `DSC` tokens can get minted based on the overcalculated collateral, potentially leading to a depeg.
+When the contract operates with fee-on-transfer tokens as collateral, too many `TSC` tokens can get minted based on the overcalculated collateral, potentially leading to a depeg.
 
 ## Tools Used
 None
@@ -1273,7 +1273,7 @@ function depositCollateral(address tokenCollateralAddress, uint256 amountCollate
         uint256 balanceAfter = IERC20(tokenCollateralAddress).balanceOf(address(this));
         amountCollateral = balanceAfter - balanceBefore;
         if (!success) {
-            revert DSCEngine__TransferFailed();
+            revert TSCEngine__TransferFailed();
         }
         s_collateralDeposited[msg.sender][tokenCollateralAddress] += amountCollateral;
         emit CollateralDeposited(msg.sender, tokenCollateralAddress, amountCollateral);
@@ -1285,7 +1285,7 @@ _Submitted by [nisedo](/profile/clk3saar60000l608gsamuvnw), [StErMi](/profile/cl
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L261
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L261
 
 ## Summary
 
@@ -1316,7 +1316,7 @@ Manual + foundry test
 
 pragma solidity 0.8.19;
 
-import {DSCEngine} from "../../src/DSCEngine.sol";
+import {TSCEngine} from "../../src/TSCEngine.sol";
 import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
@@ -1325,8 +1325,8 @@ import {StdCheats} from "forge-std/StdCheats.sol";
 import {MockV3Aggregator} from "../mocks/MockV3Aggregator.sol";
 
 contract CannotLiquidateWhenHFTest is StdCheats, Test {
-    DSCEngine public dsce;
-    DecentralizedStableCoin public dsc;
+    TSCEngine public TSCe;
+    DecentralizedStableCoin public TSC;
     HelperConfig public helperConfig;
 
     address[] public tokenAddresses;
@@ -1355,10 +1355,10 @@ contract CannotLiquidateWhenHFTest is StdCheats, Test {
         tokenAddresses = [weth, wbtc];
         priceFeedAddresses = [ethUsdPriceFeed, btcUsdPriceFeed];
 
-        dsc = new DecentralizedStableCoin();
-        dsce = new DSCEngine(tokenAddresses, priceFeedAddresses, address(dsc));
+        TSC = new DecentralizedStableCoin();
+        TSCe = new TSCEngine(tokenAddresses, priceFeedAddresses, address(TSC));
 
-        dsc.transferOwnership(address(dsce));
+        TSC.transferOwnership(address(TSCe));
 
         if (block.chainid == 31337) {
             vm.deal(user, STARTING_USER_BALANCE);
@@ -1370,8 +1370,8 @@ contract CannotLiquidateWhenHFTest is StdCheats, Test {
 
 function testLiquidateRevertIfLiquidatorHFBelow() public {
         vm.startPrank(user);
-        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-        dsce.depositCollateralAndMintDsc(weth, amountCollateral, amountToMint);
+        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
+        TSCe.depositCollateralAndMintTSC(weth, amountCollateral, amountToMint);
         vm.stopPrank();
 
         // liquidator 
@@ -1379,25 +1379,25 @@ function testLiquidateRevertIfLiquidatorHFBelow() public {
         ERC20Mock(weth).mint(liquidator, STARTING_USER_BALANCE);
 
         vm.startPrank(liquidator);
-        ERC20Mock(weth).approve(address(dsce), amountCollateral);
-        dsce.depositCollateralAndMintDsc(weth, amountCollateral, amountToMint);
+        ERC20Mock(weth).approve(address(TSCe), amountCollateral);
+        TSCe.depositCollateralAndMintTSC(weth, amountCollateral, amountToMint);
         vm.stopPrank();
 
         // now let's say that price goes down
         int256 ethUsdUpdatedPrice = 18e8; // 1 ETH = $18
 
         MockV3Aggregator(ethUsdPriceFeed).updateAnswer(ethUsdUpdatedPrice);
-        assertLt(dsce.getHealthFactor(user), 1e18);
-        assertLt(dsce.getHealthFactor(liquidator), 1e18);
+        assertLt(TSCe.getHealthFactor(user), 1e18);
+        assertLt(TSCe.getHealthFactor(liquidator), 1e18);
 
 
         // Liquidator try to liquidate 1 wei of user's debt but it will revert because of the check
         vm.startPrank(liquidator);
-        dsc.approve(address(dsce), 1 ether);
+        TSC.approve(address(TSCe), 1 ether);
 
         // system revert because `liquidator` has HF < 1
         vm.expectRevert();
-        dsce.liquidate(weth, user, 1 ether);
+        TSCe.liquidate(weth, user, 1 ether);
         vm.stopPrank();
 
 
@@ -1405,19 +1405,19 @@ function testLiquidateRevertIfLiquidatorHFBelow() public {
 
         // Liquidator supply 1000 ether and supply them to have HF > 1
         ERC20Mock(weth).mint(liquidator, 1000 ether);
-        ERC20Mock(weth).approve(address(dsce), 1000 ether);
-        dsce.depositCollateral(weth, 1000 ether);
+        ERC20Mock(weth).approve(address(TSCe), 1000 ether);
+        TSCe.depositCollateral(weth, 1000 ether);
 
         
-        uint256 liquidatorHFBefore = dsce.getHealthFactor(liquidator);
+        uint256 liquidatorHFBefore = TSCe.getHealthFactor(liquidator);
         assertGe(liquidatorHFBefore, 1e18);
 
         // perform liquidation again and prove that HF of liquidator does not change because of the liquidation itself
-        dsc.approve(address(dsce), 1 ether);
-        dsce.liquidate(weth, user, 1 ether);
+        TSC.approve(address(TSCe), 1 ether);
+        TSCe.liquidate(weth, user, 1 ether);
 
         // The liquidator is using his own funds that do not impact the liquidator HF
-        assertEq(dsce.getHealthFactor(liquidator), liquidatorHFBefore);
+        assertEq(TSCe.getHealthFactor(liquidator), liquidatorHFBefore);
         vm.stopPrank();
     }
 }
@@ -1432,7 +1432,7 @@ _Submitted by [Madalad](/profile/clki3uj3i0000l508carwkhuh), [33audits](/profile
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L112
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L112
 
 ## Summary
 Tokens whose code and logic can be changed in future can break the protocol and lock user funds.
@@ -1455,14 +1455,14 @@ _Submitted by [Bauer](/profile/clkq7w3kv00awmr08rw8dmi8o), [kz0213871](/profile/
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L229
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L229
 
 ## Summary
-DSC liquidators are prone to oracle price manipulations and MEV front-run attacks
+TSC liquidators are prone to oracle price manipulations and MEV front-run attacks
 ## Vulnerability Details
 Sudden token price changes caused by oracle price manipulations and MEV front-run can cause liquidators to get less than expected collateral tokens.
 ## Impact
-Liquidators stand to earn less than expected collateral tokens for deposited DSC
+Liquidators stand to earn less than expected collateral tokens for deposited TSC
 ## Tools Used
 Manual review
 ## Recommendations
@@ -1478,46 +1478,46 @@ _Submitted by [Tricko](/profile/clk69ooo50012ms08mzsngte2)._
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L229-L262
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L229-L262
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L272-L280
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L272-L280
 
 ## Summary
-Liquidators must specify precise amounts of DSC tokens to be burned during the liquidation process. Unfortunately, this opens up the possibility for malicious actors to prevent the full liquidation by frontrunning the liquidator's transaction and liquidating minimal amounts of DSC.
+Liquidators must specify precise amounts of TSC tokens to be burned during the liquidation process. Unfortunately, this opens up the possibility for malicious actors to prevent the full liquidation by frontrunning the liquidator's transaction and liquidating minimal amounts of TSC.
 
 ## Vulnerability Details
-Liquidations play a crucial role by maintaining collateralization above the desired ratio. If the value of the collateral drops, or if the user mints too much DSC tokens and breaches the minimum required ratio, the position becomes undercollateralized, posing a risk to the protocol. Liquidations help in enforcing these collateralization ratios, enabling DSC to maintain its value.
+Liquidations play a crucial role by maintaining collateralization above the desired ratio. If the value of the collateral drops, or if the user mints too much TSC tokens and breaches the minimum required ratio, the position becomes undercollateralized, posing a risk to the protocol. Liquidations help in enforcing these collateralization ratios, enabling TSC to maintain its value.
 
-After detecting an unhealthy position, any liquidator can call the `liquidate()` function to burn the excess DSC tokens and receive part of the user's collateral as reward. To execute this function, the liquidator must specify the precise amount of DSC tokens to be burned. Due to this requirement, it becomes possible to block full liquidations (i.e liquidations corresponding to the user's entire minted amounts of DSC). This can be achieved by any address other than the one undergoing liquidation. This includes either a secondary address of the user being liquidated (attempting to protect their collateral), or any other malicious actor aiming to obstruct the protocol's re-collaterization. The necessity of using any address other than the one undergoing liquidation is due to the `_revertIfHealthFactorIsBroken(msg.sender)` at the end of the `liquidate()` function, therefore any other healthy address can be used to perform this attack.
+After detecting an unhealthy position, any liquidator can call the `liquidate()` function to burn the excess TSC tokens and receive part of the user's collateral as reward. To execute this function, the liquidator must specify the precise amount of TSC tokens to be burned. Due to this requirement, it becomes possible to block full liquidations (i.e liquidations corresponding to the user's entire minted amounts of TSC). This can be achieved by any address other than the one undergoing liquidation. This includes either a secondary address of the user being liquidated (attempting to protect their collateral), or any other malicious actor aiming to obstruct the protocol's re-collaterization. The necessity of using any address other than the one undergoing liquidation is due to the `_revertIfHealthFactorIsBroken(msg.sender)` at the end of the `liquidate()` function, therefore any other healthy address can be used to perform this attack.
 
-This blocking mechanism operates by frontrunning the liquidator and triggering the liquidation of small amounts of DSC balance. Consequently, during the liquidator's transaction execution, it attempts to burn more tokens than the user has actually minted. This causes a revert due to an underflow issue, as illustrated in the code snippet below.
+This blocking mechanism operates by frontrunning the liquidator and triggering the liquidation of small amounts of TSC balance. Consequently, during the liquidator's transaction execution, it attempts to burn more tokens than the user has actually minted. This causes a revert due to an underflow issue, as illustrated in the code snippet below.
 
 ```solidity
-function _burnDsc(uint256 amountDscToBurn, address onBehalfOf, address dscFrom) private {
-    s_DSCMinted[onBehalfOf] -= amountDscToBurn; //Undeflow will happen here
-    bool success = i_dsc.transferFrom(dscFrom, address(this), amountDscToBurn);
+function _burnTSC(uint256 amountTSCToBurn, address onBehalfOf, address TSCFrom) private {
+    s_TSCMinted[onBehalfOf] -= amountTSCToBurn; //Undeflow will happen here
+    bool success = i_TSC.transferFrom(TSCFrom, address(this), amountTSCToBurn);
     if (!success) {
-        revert DSCEngine__TransferFailed();
+        revert TSCEngine__TransferFailed();
     }
-    i_dsc.burn(amountDscToBurn);
+    i_TSC.burn(amountTSCToBurn);
 }
 ```
 
-The exact values of DSC that the attacker has to burn to block the liquidation are dependent on the value of the user collateral and his total amount of DSC minted, but in general this values are going to be small, on the orders of thousands of wei of DSC. For example for a collateral total value of 10000USD, and 5500 worth of DSC minted, a frontrun liquidation of just 2000 wei of DSC would be enough to prevent the full liquidation.
+The exact values of TSC that the attacker has to burn to block the liquidation are dependent on the value of the user collateral and his total amount of TSC minted, but in general this values are going to be small, on the orders of thousands of wei of TSC. For example for a collateral total value of 10000USD, and 5500 worth of TSC minted, a frontrun liquidation of just 2000 wei of TSC would be enough to prevent the full liquidation.
 
-Consider the example scenario below. Alice has minted $5500 worth of DSC, however her ETH deposited as collateral is worth $10000, therefore below the minimum 200% collateralization.
-1. Bob (the liquidator) sees Alice's position and decide to liquidate her full DSC position to restore the protocol health (by calling `liquidate(address(WETH), address(alice), 5500000000000000000000)`
+Consider the example scenario below. Alice has minted $5500 worth of TSC, however her ETH deposited as collateral is worth $10000, therefore below the minimum 200% collateralization.
+1. Bob (the liquidator) sees Alice's position and decide to liquidate her full TSC position to restore the protocol health (by calling `liquidate(address(WETH), address(alice), 5500000000000000000000)`
 2. Alice see Bob's transaction on the mempool and tries to frontrunning it by calling ``liquidate(address(WETH), address(alice), 2000)`` using her secondary address.
-Consider that Alice is sucessfull in frontrunning Bob, therefore after Alice's tx, `s_DSCMinted[address(Alice)]` will be 5499999999999999998000.
-3. Now during Bob's transaction execution, `liquidate` will try to burn `5500000000000000000000` DSC tokens from Alice, but her `s_DSCMinted[address(Alice)]` is `5499999999999999998000`, causing the call to revert due to arithmetic underflow.
+Consider that Alice is sucessfull in frontrunning Bob, therefore after Alice's tx, `s_TSCMinted[address(Alice)]` will be 5499999999999999998000.
+3. Now during Bob's transaction execution, `liquidate` will try to burn `5500000000000000000000` TSC tokens from Alice, but her `s_TSCMinted[address(Alice)]` is `5499999999999999998000`, causing the call to revert due to arithmetic underflow.
 
 See POC below for example:
 ```solidity
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 
-import {DeployDSC} from "../../script/DeployDSC.s.sol";
-import {DSCEngine} from "../../src/DSCEngine.sol";
+import {DeployTSC} from "../../script/DeployTSC.s.sol";
+import {TSCEngine} from "../../src/TSCEngine.sol";
 import {DecentralizedStableCoin} from "../../src/DecentralizedStableCoin.sol";
 import {HelperConfig} from "../../script/HelperConfig.s.sol";
 import {ERC20Mock} from "@openzeppelin/contracts/mocks/ERC20Mock.sol";
@@ -1526,8 +1526,8 @@ import {Test} from "forge-std/Test.sol";
 import {stdError} from "forge-std/StdError.sol";
 
 contract LiquidationPOC is Test {
-    DSCEngine public dsce;
-    DecentralizedStableCoin public dsc;
+    TSCEngine public TSCe;
+    DecentralizedStableCoin public TSC;
     HelperConfig public helperConfig;
 
     address public ethUsdPriceFeed;
@@ -1542,8 +1542,8 @@ contract LiquidationPOC is Test {
     address public attacker = makeAddr("attacker");
 
     function setUp() external {
-        DeployDSC deployer = new DeployDSC();
-        (dsc, dsce, helperConfig) = deployer.run();
+        DeployTSC deployer = new DeployTSC();
+        (TSC, TSCe, helperConfig) = deployer.run();
         (ethUsdPriceFeed, btcUsdPriceFeed, weth, wbtc, deployerKey) = helperConfig.activeNetworkConfig();
 
         //Setting collateral USD prices
@@ -1552,24 +1552,24 @@ contract LiquidationPOC is Test {
         //Mints and approvals for the Alice
         ERC20Mock(weth).mint(alice, 10 ether);
         vm.startPrank(alice);
-        ERC20Mock(weth).approve(address(dsce), 10 ether);
-        dsce.depositCollateralAndMintDsc(weth, 10 ether, 5500 ether);
+        ERC20Mock(weth).approve(address(TSCe), 10 ether);
+        TSCe.depositCollateralAndMintTSC(weth, 10 ether, 5500 ether);
         vm.stopPrank();
 
         //Mints and approvals for the Bob (liquidator)
         ERC20Mock(weth).mint(bob, 30 ether);
         vm.startPrank(bob);
-        ERC20Mock(weth).approve(address(dsce), 30 ether);
-        dsce.depositCollateralAndMintDsc(weth, 30 ether, 10000 ether);
-        dsc.approve(address(dsce), 10000 ether);
+        ERC20Mock(weth).approve(address(TSCe), 30 ether);
+        TSCe.depositCollateralAndMintTSC(weth, 30 ether, 10000 ether);
+        TSC.approve(address(TSCe), 10000 ether);
         vm.stopPrank();
 
         //Mints and approvals for the attacker
         ERC20Mock(weth).mint(attacker, 10 ether);
         vm.startPrank(attacker);
-        ERC20Mock(weth).approve(address(dsce), 10 ether);
-        dsce.depositCollateralAndMintDsc(weth, 10 ether, 10 ether);
-        dsc.approve(address(dsce), 10 ether);
+        ERC20Mock(weth).approve(address(TSCe), 10 ether);
+        TSCe.depositCollateralAndMintTSC(weth, 10 ether, 10 ether);
+        TSC.approve(address(TSCe), 10 ether);
         vm.stopPrank();
 
         //Reducing collateral USD price to put Alice in unhealthy state.
@@ -1577,22 +1577,22 @@ contract LiquidationPOC is Test {
     }
 
     function testLiquidationDoS() public {
-        (uint256 dscMinted, uint256 collateralUSD) = dsce.getAccountInformation(alice);
-        assertEq(dscMinted, 5500*1e18);  //DSC worth $5500
+        (uint256 TSCMinted, uint256 collateralUSD) = TSCe.getAccountInformation(alice);
+        assertEq(TSCMinted, 5500*1e18);  //TSC worth $5500
         assertEq(collateralUSD, 10000*1e18); //Collateral worth $10000
 
         //1. Assert Alice position is unhealthy
-        uint256 userHealthFactor = dsce.getHealthFactor(alice);
+        uint256 userHealthFactor = TSCe.getHealthFactor(alice);
         assertEq(userHealthFactor < MIN_HEALTH_FACTOR, true); 
 
-        //2. Attacker frontruns Bob's transaction and liquidates 2000wei of DSC
+        //2. Attacker frontruns Bob's transaction and liquidates 2000wei of TSC
         vm.prank(attacker);
-        dsce.liquidate(weth, alice, 2000); 
+        TSCe.liquidate(weth, alice, 2000); 
 
         //3. Bob's transaction reverts
         vm.expectRevert(stdError.arithmeticError); //Arithmetic over/underflow
         vm.prank(bob);
-        dsce.liquidate(weth, alice, 5500*1e18);
+        TSCe.liquidate(weth, alice, 5500*1e18);
     }
 }
 ```
@@ -1604,14 +1604,14 @@ Full liquidations can be blocked. Therefore liquidators will have to resort to p
 Manual Review
 
 ## Recommendations
-Consider allowing the liquidator to pass `type(uint256).max` as the `debtToCover` parameter, which will result to liquidating all DSC minted by the target account, regardless of the current balance. See the code below for an example implementation.
+Consider allowing the liquidator to pass `type(uint256).max` as the `debtToCover` parameter, which will result to liquidating all TSC minted by the target account, regardless of the current balance. See the code below for an example implementation.
 
 ```diff
-diff --git a/DSCEngine.orig.sol b/DSCEngine.sol
+diff --git a/TSCEngine.orig.sol b/TSCEngine.sol
 index e7d5c0d..6feef25 100644
---- a/DSCEngine.orig.sol
-+++ b/DSCEngine.sol
-@@ -227,36 +227,40 @@ contract DSCEngine is ReentrancyGuard {
+--- a/TSCEngine.orig.sol
++++ b/TSCEngine.sol
+@@ -227,36 +227,40 @@ contract TSCEngine is ReentrancyGuard {
       * Follows CEI: Checks, Effects, Interactions
       */
      function liquidate(address collateral, address user, uint256 debtToCover)
@@ -1622,33 +1622,33 @@ index e7d5c0d..6feef25 100644
          // need to check health factor of the user
          uint256 startingUserHealthFactor = _healthFactor(user);
          if (startingUserHealthFactor >= MIN_HEALTH_FACTOR) {
-             revert DSCEngine__HealthFactorOk();
+             revert TSCEngine__HealthFactorOk();
          }
-         // We want to burn their DSC "debt"
+         // We want to burn their TSC "debt"
          // And take their collateral
-         // Bad User: $140 ETH, $100 DSC
+         // Bad User: $140 ETH, $100 TSC
          // debtToCover = $100
-         // $100 of DSC == ??? ETH?
+         // $100 of TSC == ??? ETH?
          // 0.05 ETH
 +        if (debtToCover == type(uint256).max) {
-+            (uint256 dscMinted,) = _getAccountInformation(user);
-+            debtToCover = dscMinted;
++            (uint256 TSCMinted,) = _getAccountInformation(user);
++            debtToCover = TSCMinted;
 +        }
          uint256 tokenAmountFromDebtCovered = getTokenAmountFromUsd(collateral, debtToCover);
          // And give them a 10% bonus
-         // So we are giving the liquidator $110 of WETH for 100 DSC
+         // So we are giving the liquidator $110 of WETH for 100 TSC
          // We should implement a feature to liquidate in the event the protocol is insolvent
          // And sweep extra amounts into a treasury
          // 0.05 * 0.1 = 0.005. Getting 0.055
          uint256 bonusCollateral = (tokenAmountFromDebtCovered * LIQUIDATION_BONUS) / LIQUIDATION_PRECISION;
          uint256 totalCollateralToRedeem = tokenAmountFromDebtCovered + bonusCollateral;
          _redeemCollateral(user, msg.sender, collateral, totalCollateralToRedeem);
-         // We need to burn the DSC
-         _burnDsc(debtToCover, user, msg.sender);
+         // We need to burn the TSC
+         _burnTSC(debtToCover, user, msg.sender);
 
          uint256 endingUserHealthFactor = _healthFactor(user);
          if (endingUserHealthFactor <= startingUserHealthFactor) {
-             revert DSCEngine__HealthFactorNotImproved();
+             revert TSCEngine__HealthFactorNotImproved();
          }
          _revertIfHealthFactorIsBroken(msg.sender);
      }
@@ -1656,36 +1656,36 @@ index e7d5c0d..6feef25 100644
 
 # Low Risk Findings
 
-## <a id='L-01'></a>L-01. Improving the burnDsc() to allow users to mitigate their liquidation's impact
+## <a id='L-01'></a>L-01. Improving the burnTSC() to allow users to mitigate their liquidation's impact
 
 _Submitted by [nmirchev8](/profile/clkao1p090000ld08dv6v2xus), [nisedo](/profile/clk3saar60000l608gsamuvnw), [StErMi](/profile/clk579hcp0014l508ybc3ec6z), [sobieski](/profile/clk7551e0001ol408rl4fyi5s), [iurii2002](/profile/clkjopcpe0020mb08ev4t85e5), [0x9527](/profile/clk6fywww000kk0089eqo3hem), [Ericselvig](/profile/clk3tbdri000qib08vc8d5xn2), [serialcoder](/profile/clkb309g90008l208so2bzcy6), [Tatakae](/team/clkpe7ipx0001kz08k8k1pp3v), [seraviz](/profile/clkctjlzr000al908xkmooh9q), [Maroutis](/profile/clkctygft000il9088nkvgyqk), [Ankit](/profile/clk3sb327000cl508dkwq4ypi). Selected submission by: [serialcoder](/profile/clkb309g90008l208so2bzcy6)._      
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L214
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L214
 
 ## Summary
 
-The `burnDsc()` does not allow a user to partially burn some available DSC tokens to mitigate the liquidation's impact (if an amount of the burned tokens are not sufficient to improve their health factor to become healthy (> `MIN_HEALTH_FACTOR`)).
+The `burnTSC()` does not allow a user to partially burn some available TSC tokens to mitigate the liquidation's impact (if an amount of the burned tokens are not sufficient to improve their health factor to become healthy (> `MIN_HEALTH_FACTOR`)).
 
 ## Vulnerability Details
 
-In the situation that a user's health factor is unhealthy (< `MIN_HEALTH_FACTOR`), the user will not be able to partially burn some available of their minted DSC tokens to mitigate the liquidation's impact.
+In the situation that a user's health factor is unhealthy (< `MIN_HEALTH_FACTOR`), the user will not be able to partially burn some available of their minted TSC tokens to mitigate the liquidation's impact.
 
-Specifically, the `_revertIfHealthFactorIsBroken()` in the `burnDsc()` will revert the transaction if the user's health factor is still unhealthy (even if the burning of the DSC tokens may improve the user's health factor).
+Specifically, the `_revertIfHealthFactorIsBroken()` in the `burnTSC()` will revert the transaction if the user's health factor is still unhealthy (even if the burning of the TSC tokens may improve the user's health factor).
 
 ```solidity
-    function burnDsc(uint256 amount) public moreThanZero(amount) {
-        _burnDsc(amount, msg.sender, msg.sender);
+    function burnTSC(uint256 amount) public moreThanZero(amount) {
+        _burnTSC(amount, msg.sender, msg.sender);
 @>      _revertIfHealthFactorIsBroken(msg.sender); // I don't think this would ever hit...
     }
 ```
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L214
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L214
 
 ## Impact
 
-The `burnDsc()` does not allow a user to partially burn some available DSC tokens to mitigate the liquidation's impact (if an amount of the burned tokens are not sufficient to improve their health factor to become healthy (> `MIN_HEALTH_FACTOR`)). 
+The `burnTSC()` does not allow a user to partially burn some available TSC tokens to mitigate the liquidation's impact (if an amount of the burned tokens are not sufficient to improve their health factor to become healthy (> `MIN_HEALTH_FACTOR`)). 
 
 With this design choice, a user may face a big impact from the liquidation that cannot be mitigated.
 
@@ -1695,11 +1695,11 @@ Manual Review
 
 ## Recommendations
 
-Consider removing the `_revertIfHealthFactorIsBroken()` from the `burnDsc()` to enable a user to partially burn some available DSC tokens to mitigate their liquidation's impact.
+Consider removing the `_revertIfHealthFactorIsBroken()` from the `burnTSC()` to enable a user to partially burn some available TSC tokens to mitigate their liquidation's impact.
 
 ```diff
-    function burnDsc(uint256 amount) public moreThanZero(amount) {
-        _burnDsc(amount, msg.sender, msg.sender);
+    function burnTSC(uint256 amount) public moreThanZero(amount) {
+        _burnTSC(amount, msg.sender, msg.sender);
 -       _revertIfHealthFactorIsBroken(msg.sender); // I don't think this would ever hit...
     }
 ```
@@ -1709,13 +1709,13 @@ _Submitted by [0xAadhi](/profile/clk75injq0004l908x4ygb7bp), [Phantasmagoria](/p
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L112-L123
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L112-L123
 
 ## Summary
 In the current implementation the token and price feed addresses aren’t checked for zero address upon initialization, there is a modifier which catch scenarios when price feed with zero address will be passed, but not for token addresses.
 
 ## Vulnerability Details
-When deploy the `DSCEngine.sol`, if pass token with address(0) and working price feed address, the deployment will be successful, but the user experience is going to fall when using the protocol, due to EVM Revert.
+When deploy the `TSCEngine.sol`, if pass token with address(0) and working price feed address, the deployment will be successful, but the user experience is going to fall when using the protocol, due to EVM Revert.
 
 ```solidity
 // Deploying the protocol localy with token address(0)
@@ -1731,7 +1731,7 @@ return NetworkConfig({
 ```
 
 ## Impact
-It will make freshly deployed DSCEngine unusable and the protocol deployer will have to redeploy everything.
+It will make freshly deployed TSCEngine unusable and the protocol deployer will have to redeploy everything.
 
 ## Tools Used
 Manual, Foundry
@@ -1740,20 +1740,20 @@ Manual, Foundry
 Add a check in the constructor
 
 ```solidity
-constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
+constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address TSCAddress) {
     // USD Price Feeds
     if (tokenAddresses.length != priceFeedAddresses.length) {
-        revert DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
+        revert TSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
     }
     // For example ETH / USD, BTC / USD, MKR / USD, etc
     for (uint256 i = 0; i < tokenAddresses.length; i++) {
     +   if (tokenAddresses[i] == address(0) || priceFeedAddresses[i] == address(0)) {
-    +       revert DSCEngine__TokenAddressZero();
+    +       revert TSCEngine__TokenAddressZero();
     +   }
         s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i];
         s_collateralTokens.push(tokenAddresses[i]);
     }
-    i_dsc = DecentralizedStableCoin(dscAddress);
+    i_TSC = DecentralizedStableCoin(TSCAddress);
 }
 ```
 
@@ -1763,7 +1763,7 @@ function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public vie
     // $/ETH ETH ??
     // $2000 / ETH. $1000 = 0.5 ETH
 +   if (token == address(0)) {
-+       revert DSCEngine__NotAllowedToken();
++       revert TSCEngine__NotAllowedToken();
 +   }
     AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
     (, int256 price,,,) = priceFeed.staleCheckLatestRoundData();
@@ -1776,7 +1776,7 @@ function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public vie
 ```solidity
 function getUsdValue(address token, uint256 amount) public view returns (uint256) {
 +   if (token == address(0)) {
-+       revert DSCEngine__NotAllowedToken();
++       revert TSCEngine__NotAllowedToken();
 +   }
 
     AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
@@ -1793,14 +1793,14 @@ _Submitted by [castleChain](/profile/clk48to2u004wla08041jl9ld), [ZanyBonzy](/pr
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L229
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L229
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L212
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L212
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L197
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L197
 
 ## Summary
-The functions ``mintDsc``, ``burnDsc`` and ``liquidate`` do not emit any events. 
+The functions ``mintTSC``, ``burnTSC`` and ``liquidate`` do not emit any events. 
 
 ## Vulnerability Details
 Event logs are crucial for off-chain services as they notify external users, such as a listening frontend website or client application, that something has happened on the blockchain.
@@ -1819,7 +1819,7 @@ _Submitted by [nisedo](/profile/clk3saar60000l608gsamuvnw), [0xNiloy](/profile/c
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L24
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L24
 
 ## Summary
 Pragma isn't specified correctly which can lead to a nonfunction/damaged contract when deployed on Arbitrum
@@ -1849,9 +1849,9 @@ _Submitted by [kutu](/profile/clk7qwwzw001gm9088xsr6a22), [nisedo](/profile/clk3
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L330
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L330
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L331
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L331
 
 ## Summary
 
@@ -1859,23 +1859,23 @@ The calculation of the health factor in the `_calculateHealthFactor()` suffers f
 
 ## Vulnerability Details
 
-Division before multiplication can lead to rounding down issue since Solidity has no fixed-point numbers. Consider the calculation of the health factor in the `_calculateHealthFactor()`, the function does [the division (by LIQUIDATION_PRECISION)](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L330) before [the multiplication (by 1e18)](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L331). Hence, the computed result can suffer from the rounding down issue, resulting in a small precision loss.
+Division before multiplication can lead to rounding down issue since Solidity has no fixed-point numbers. Consider the calculation of the health factor in the `_calculateHealthFactor()`, the function does [the division (by LIQUIDATION_PRECISION)](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L330) before [the multiplication (by 1e18)](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L331). Hence, the computed result can suffer from the rounding down issue, resulting in a small precision loss.
 
 ```solidity
-    function _calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
+    function _calculateHealthFactor(uint256 totalTSCMinted, uint256 collateralValueInUsd)
         internal
         pure
         returns (uint256)
     {
-        if (totalDscMinted == 0) return type(uint256).max;
+        if (totalTSCMinted == 0) return type(uint256).max;
 @>      uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION; //@audit Division (by LIQUIDATION_PRECISION) before multiplication
-@>      return (collateralAdjustedForThreshold * 1e18) / totalDscMinted; //@audit Multiplication (by 1e18) after division
+@>      return (collateralAdjustedForThreshold * 1e18) / totalTSCMinted; //@audit Multiplication (by 1e18) after division
     }
 ```
 
-- `Division (by LIQUIDATION_PRECISION) before multiplication`: https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L330
+- `Division (by LIQUIDATION_PRECISION) before multiplication`: https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L330
 
-- `Multiplication (by 1e18) after division`: https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L331
+- `Multiplication (by 1e18) after division`: https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L331
 
 ## Impact
 
@@ -1890,33 +1890,33 @@ Manual Review
 I recommend improving the affected formula by taking multiplications before divisions to prevent truncation, as shown below.
 
 ```diff
-    function _calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
+    function _calculateHealthFactor(uint256 totalTSCMinted, uint256 collateralValueInUsd)
         internal
         pure
         returns (uint256)
     {
-        if (totalDscMinted == 0) return type(uint256).max;
+        if (totalTSCMinted == 0) return type(uint256).max;
 -       uint256 collateralAdjustedForThreshold = (collateralValueInUsd * LIQUIDATION_THRESHOLD) / LIQUIDATION_PRECISION;
--       return (collateralAdjustedForThreshold * 1e18) / totalDscMinted;
+-       return (collateralAdjustedForThreshold * 1e18) / totalTSCMinted;
 
-+       return (collateralValueInUsd * LIQUIDATION_THRESHOLD * 1e18) / (LIQUIDATION_PRECISION * totalDscMinted);
++       return (collateralValueInUsd * LIQUIDATION_THRESHOLD * 1e18) / (LIQUIDATION_PRECISION * totalTSCMinted);
     }
 ```
-## <a id='L-06'></a>L-06. Unbounded Loops Found in DSCEngine.sol can lead to DoS of liquidations
+## <a id='L-06'></a>L-06. Unbounded Loops Found in TSCEngine.sol can lead to DoS of liquidations
 
 _Submitted by [aviggiano](/profile/clk3yu8m7001kjq08r9a7wgsh), [0xdeadbeef](/profile/clke8rp1x0004jy08e1ddz8s0). Selected submission by: [aviggiano](/profile/clk3yu8m7001kjq08r9a7wgsh)._      
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L353
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L353
 
 ## Summary
 
-The contract `DSCEngine.sol` contains unbounded loops over the `s_collateralTokens` array, which is used in critical parts of the system, such as when checking the health factor of a user, which is used on liquidations. In some cases, such as with ERC777 tokens, a significant amount of gas can be consumed by a transaction such that it reverts due to block size limits, impacting the overall health of the system.
+The contract `TSCEngine.sol` contains unbounded loops over the `s_collateralTokens` array, which is used in critical parts of the system, such as when checking the health factor of a user, which is used on liquidations. In some cases, such as with ERC777 tokens, a significant amount of gas can be consumed by a transaction such that it reverts due to block size limits, impacting the overall health of the system.
 
 ## Vulnerability Details
 
-In `DSCEngine.sol:350`, the function `getAccountCollateralValue` loops through each collateral token, retrieves the deposited amount and maps it to the price to calculate the USD value. However, the iteration limit of this loop is dependent on the length of `s_collateralTokens`, which is not bound. This leads to a situation where the function could iterate through a large enough number of tokens, making the function susceptible to attacks that exploit high gas fees. 
+In `TSCEngine.sol:350`, the function `getAccountCollateralValue` loops through each collateral token, retrieves the deposited amount and maps it to the price to calculate the USD value. However, the iteration limit of this loop is dependent on the length of `s_collateralTokens`, which is not bound. This leads to a situation where the function could iterate through a large enough number of tokens, making the function susceptible to attacks that exploit high gas fees. 
 
 If this is paired with tokens that contain callbacks or hooks, such as ERC777 tokens, the liquidated user can construct a contract such that it consumes too much gas on the [tokensToSend](https://docs.openzeppelin.com/contracts/2.x/api/token/erc777#IERC777Sender) (or analogous) hook, which would lead to DoS of the liquidation process.
 
@@ -1939,7 +1939,7 @@ _Submitted by [vic43](/profile/clkx55fzt0008l408wtdumivr)._
 
 
 ## Summary
-The DSCEngine contract defines the getTokenAmountFromUsd function, which 
+The TSCEngine contract defines the getTokenAmountFromUsd function, which 
 implement a division.  however, the division by 0
 check is missing, which will cause an error if encountered.
 ## Vulnerability Details
@@ -1961,15 +1961,15 @@ _Submitted by [0xSafeGuard](/team/clkhmrygo0001l508vlnyl978), [mahdirostami](/pr
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L356
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L356
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L155
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L155
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L198
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L198
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L273
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L273
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L285
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L285
 
 ## details 
 using x=x+y /x=x-y  is more gas efficient than x+=y / x-=y
@@ -2028,7 +2028,7 @@ function staleCheckLatestRoundData(AggregatorV3Interface priceFeed)
 ```
 
 ```solidity
-contract DSCEngine
+contract TSCEngine
 
 function getUsdValue(address token, uint256 amount) public view returns (uint256) {
     AggregatorV3Interface priceFeed = AggregatorV3Interface(s_priceFeeds[token]);
@@ -2041,7 +2041,7 @@ function getUsdValue(address token, uint256 amount) public view returns (uint256
 ```
 
 ```solidity
-contract DSCEngine
+contract TSCEngine
 
 function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256) {
     // price of ETH (token)
@@ -2060,7 +2060,7 @@ _Submitted by [SBSecurity](/team/clkuz8xt7001vl608nphmevro), [SAQ](/profile/clkf
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L329
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L329
 
 ## Summary
 At the places where `type(uint256).max` is used it can be replaced with constant variable with the same value as this from the expression, it will save gas because constant variables are stored in the contract byte code.
@@ -2069,7 +2069,7 @@ Each of the recommendations below saves 24 gas (Tested in remix)
 
 ## Instances
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L329
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L329
 
 ## Tools Used
 Manual
@@ -2101,30 +2101,30 @@ These two checks are already in the inherited `ERC20Burnable` contract:
 
 58:        if (_to == address(0)) {
 ```
-These two checks are already in the `moreThanZero` modifier of the `DSCEngine` contract:
+These two checks are already in the `moreThanZero` modifier of the `TSCEngine` contract:
 ```solidity
 48:        if (_amount <= 0) {
 
 61:        if (_amount <= 0) {
 ```
 
-## <a id='G-05'></a>G-05. `DSCEngine` should deploy its own `DecentralizedStableCoin`
+## <a id='G-05'></a>G-05. `TSCEngine` should deploy its own `DecentralizedStableCoin`
 
 _Submitted by [warRoom](/team/clkuq3mcw0001ju08fzp9y8bi), [0xDanielH](/profile/clkkityt00000mj08mr89rdav), [cuthalion0x](/profile/clk43656v008cmb081faosv4x). Selected submission by: [cuthalion0x](/profile/clk43656v008cmb081faosv4x)._      
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L122
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L122
 
 ## Summary
-`DSCEngine` should deploy its own `DecentralizedStableCoin` instead of accepting an address upon construction.
+`TSCEngine` should deploy its own `DecentralizedStableCoin` instead of accepting an address upon construction.
 
 ## Vulnerability Details
-There is a perfect 1:1 correspondence between `DSCEngine` and `DecentralizedStableCoin`:
-- `DSCEngine` tracks a single, immutable `i_dsc` address.
+There is a perfect 1:1 correspondence between `TSCEngine` and `DecentralizedStableCoin`:
+- `TSCEngine` tracks a single, immutable `i_TSC` address.
 - `DecentralizedStableCoin` has a single `owner` with the power to `mint()` and `burn()` tokens.
 
-Therefore, it is needless to deploy the `DecentralizedStableCoin` prior to deployment of a `DSCEngine` and only serves to add extra steps to the process, including migration of the `owner`.
+Therefore, it is needless to deploy the `DecentralizedStableCoin` prior to deployment of a `TSCEngine` and only serves to add extra steps to the process, including migration of the `owner`.
 
 ## Impact
 Unnecessary gas/deployment UX burden.
@@ -2133,11 +2133,11 @@ Unnecessary gas/deployment UX burden.
 Manual review.
 
 ## Recommendations
-Consider changing the `DSCEngine` constructor like this:
+Consider changing the `TSCEngine` constructor like this:
 
 ```diff
--         i_dsc = DecentralizedStableCoin(dscAddress);
-+         i_dsc = new DecentralizedStableCoin();
+-         i_TSC = DecentralizedStableCoin(TSCAddress);
++         i_TSC = new DecentralizedStableCoin();
 ```
 ## <a id='G-06'></a>G-06. `burn()` and `staleCheckLatestRoundData()` and `getTimeout()` can be `external`
 
@@ -2185,7 +2185,7 @@ testRevertsWithUnapprovedCollateral() (gas: -60 (-0.008%))
 testProperlyReportsHealthFactor() (gas: -19 (-0.009%)) 
 testRevertsIfRedeemAmountIsZero() (gas: -19 (-0.009%)) 
 testCanDepositCollateralWithoutMinting() (gas: -17 (-0.019%)) 
-testCanMintDsc() (gas: -40 (-0.020%)) 
+testCanMintTSC() (gas: -40 (-0.020%)) 
 testCanMintWithDepositedCollateral() (gas: -40 (-0.020%)) 
 testRevertsIfTokenLengthDoesntMatchPriceFeeds() (gas: -54 (-0.030%)) 
 testRevertsIfBurnAmountIsZero() (gas: -79 (-0.039%)) 
@@ -2196,7 +2196,7 @@ testMustBurnMoreThanZero() (gas: -32 (-0.053%))
 testCantMintToZeroAddress() (gas: -7 (-0.056%)) 
 testMustMintMoreThanZero() (gas: -7 (-0.058%)) 
 testRevertsIfCollateralZero() (gas: -60 (-0.138%)) 
-testRevertsIfMintedDscBreaksHealthFactor() (gas: -490 (-0.295%)) 
+testRevertsIfMintedTSCBreaksHealthFactor() (gas: -490 (-0.295%)) 
 testRevertsIfMintAmountBreaksHealthFactor() (gas: -496 (-0.298%)) 
 testUserStillHasSomeEthAfterLiquidation() (gas: -1821 (-0.365%)) 
 testLiquidationPayoutIsCorrect() (gas: -1821 (-0.376%)) 
@@ -2204,7 +2204,7 @@ testLiquidatorTakesOnUsersDebt() (gas: -1821 (-0.377%))
 testUserHasNoMoreDebt() (gas: -1821 (-0.377%)) 
 testCanRedeemDepositedCollateral() (gas: -1823 (-0.724%)) 
 testMustRedeemMoreThanZero() (gas: -1806 (-0.762%)) 
-testCanBurnDsc() (gas: -1823 (-0.768%)) 
+testCanBurnTSC() (gas: -1823 (-0.768%)) 
 Overall gas change: -14550 (-0.096%)
 
 ## Tools Used
@@ -2234,17 +2234,17 @@ File: src/DecentralizedStableCoin.sol
 
 61:  if (_amount <= 0) {
 ```
-## <a id='G-09'></a>G-09. # `_burnDsc` function on `DSCEngine` can be simplified
+## <a id='G-09'></a>G-09. # `_burnTSC` function on `TSCEngine` can be simplified
 
 _Submitted by [LaScaloneta](/team/clkgxjy6h0025lc080s97ux79)._      
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L274-L279
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L274-L279
 
 ## Summary
 
-`_burnDsc` function on `DSCEngine` can be simplified to avoid extra calls.
+`_burnTSC` function on `TSCEngine` can be simplified to avoid extra calls.
 
 ## Vulnerability Details
 
@@ -2267,7 +2267,7 @@ testLiquidationPayoutIsCorrect() (gas: -20737 (-4.281%))
 testLiquidatorTakesOnUsersDebt() (gas: -20737 (-4.289%)) 
 testUserHasNoMoreDebt() (gas: -20737 (-4.290%)) 
 testCanRedeemDepositedCollateral() (gas: -20737 (-8.240%)) 
-testCanBurnDsc() (gas: -20737 (-8.739%)) 
+testCanBurnTSC() (gas: -20737 (-8.739%)) 
 testMustRedeemMoreThanZero() (gas: -20737 (-8.751%)) 
 Overall gas change: -336291 (-2.229%)
 ```
@@ -2279,21 +2279,21 @@ Manual revision
 ## Recommendations
 
 ```diff
-diff --git a/src/DSCEngine.sol b/src/DSCEngine.sol
+diff --git a/src/TSCEngine.sol b/src/TSCEngine.sol
 index a7a6639..1906a92 100644
---- a/src/DSCEngine.sol
-+++ b/src/DSCEngine.sol
-@@ -271,12 +271,7 @@ contract DSCEngine is ReentrancyGuard {
+--- a/src/TSCEngine.sol
++++ b/src/TSCEngine.sol
+@@ -271,12 +271,7 @@ contract TSCEngine is ReentrancyGuard {
       */
-     function _burnDsc(uint256 amountDscToBurn, address onBehalfOf, address dscFrom) private {
-         s_DSCMinted[onBehalfOf] -= amountDscToBurn;
--        bool success = i_dsc.transferFrom(dscFrom, address(this), amountDscToBurn);
+     function _burnTSC(uint256 amountTSCToBurn, address onBehalfOf, address TSCFrom) private {
+         s_TSCMinted[onBehalfOf] -= amountTSCToBurn;
+-        bool success = i_TSC.transferFrom(TSCFrom, address(this), amountTSCToBurn);
 -        // This conditional is hypothtically unreachable
 -        if (!success) {
--            revert DSCEngine__TransferFailed();
+-            revert TSCEngine__TransferFailed();
 -        }
--        i_dsc.burn(amountDscToBurn);
-+        i_dsc.burnFrom(dscFrom, amountDscToBurn);
+-        i_TSC.burn(amountTSCToBurn);
++        i_TSC.burnFrom(TSCFrom, amountTSCToBurn);
      }
  
      function _redeemCollateral(address from, address to, address tokenCollateralAddress, uint256 amountCollateral)
@@ -2314,7 +2314,7 @@ An optimization issue has been identified in the `DecentralizedStableCoin` smart
 
 While this is not a security vulnerability per se, the current implementation is inefficient and could be improved. 
 
-1. The contract uses the `Ownable` contract from OpenZeppelin. The `Ownable` contract is designed to provide a general ownership solution, which can be overkill in many situations. In this case, the `DecentralizedStableCoin` is always owned by `DSCEngine`, so a simpler ownership pattern can be used.
+1. The contract uses the `Ownable` contract from OpenZeppelin. The `Ownable` contract is designed to provide a general ownership solution, which can be overkill in many situations. In this case, the `DecentralizedStableCoin` is always owned by `TSCEngine`, so a simpler ownership pattern can be used.
 
 2. The `DecentralizedStableCoin` contract extends `ERC20Burnable`, which provides an additional `burnFrom` method that allows third parties to burn tokens from a user's account (provided they have an allowance). This functionality is not required in the current context.
 
@@ -2333,10 +2333,10 @@ testUserHasNoMoreDebt() (gas: -1992 (-0.412%))
 testCantLiquidateGoodHealthFactor() (gas: -2204 (-0.622%)) 
 testHealthFactorCanGoBelowOne() (gas: -2102 (-0.725%)) 
 testCanRedeemDepositedCollateral() (gas: -1893 (-0.752%)) 
-testCanBurnDsc() (gas: -1893 (-0.798%)) 
+testCanBurnTSC() (gas: -1893 (-0.798%)) 
 testMustRedeemMoreThanZero() (gas: -1911 (-0.806%)) 
 testProperlyReportsHealthFactor() (gas: -2102 (-1.000%)) 
-testCanMintDsc() (gas: -2080 (-1.018%)) 
+testCanMintTSC() (gas: -2080 (-1.018%)) 
 testCanMintWithDepositedCollateral() (gas: -2080 (-1.024%)) 
 testRevertsIfRedeemAmountIsZero() (gas: -2102 (-1.044%)) 
 testRevertsIfBurnAmountIsZero() (gas: -2102 (-1.045%)) 
@@ -2362,7 +2362,7 @@ index d3652a5..58cd9b7 100644
 --- a/src/DecentralizedStableCoin.sol
 +++ b/src/DecentralizedStableCoin.sol
 @@ -36,14 +36,19 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-  * This is the contract meant to be governed by DSCEngine. This contract is just the ERC20 implementation of our stablecoin system.
+  * This is the contract meant to be governed by TSCEngine. This contract is just the ERC20 implementation of our stablecoin system.
   *
   */
 -contract DecentralizedStableCoin is ERC20Burnable, Ownable {
@@ -2373,8 +2373,8 @@ index d3652a5..58cd9b7 100644
      error DecentralizedStableCoin__BurnAmountExceedsBalance();
      error DecentralizedStableCoin__NotZeroAddress();
  
--    constructor() ERC20("DecentralizedStableCoin", "DSC") {}
-+    constructor(address _owner) ERC20("DecentralizedStableCoin", "DSC") {
+-    constructor() ERC20("DecentralizedStableCoin", "TSC") {}
++    constructor(address _owner) ERC20("DecentralizedStableCoin", "TSC") {
 +        i_owner = _owner;
 +    }
  
@@ -2413,36 +2413,36 @@ index e745c53..94c8844 100644
 --- a/test/unit/DecentralizedStablecoinTest.t.sol
 +++ b/test/unit/DecentralizedStablecoinTest.t.sol
 @@ -10,7 +10,7 @@ contract DecentralizedStablecoinTest is StdCheats, Test {
-     DecentralizedStableCoin dsc;
+     DecentralizedStableCoin TSC;
  
      function setUp() public {
--        dsc = new DecentralizedStableCoin();
-+        dsc = new DecentralizedStableCoin(address(this));
+-        TSC = new DecentralizedStableCoin();
++        TSC = new DecentralizedStableCoin(address(this));
      }
  
      function testMustMintMoreThanZero() public {
 
-diff --git a/script/DeployDSC.s.sol b/script/DeployDSC.s.sol
+diff --git a/script/DeployTSC.s.sol b/script/DeployTSC.s.sol
 index 24192fb..a1b0aba 100644
---- a/script/DeployDSC.s.sol
-+++ b/script/DeployDSC.s.sol
-@@ -21,10 +21,14 @@ contract DeployDSC is Script {
+--- a/script/DeployTSC.s.sol
++++ b/script/DeployTSC.s.sol
+@@ -21,10 +21,14 @@ contract DeployTSC is Script {
          priceFeedAddresses = [wethUsdPriceFeed, wbtcUsdPriceFeed];
  
          vm.startBroadcast(deployerKey);
--        DecentralizedStableCoin dsc = new DecentralizedStableCoin();
--        DSCEngine engine = new DSCEngine(tokenAddresses, priceFeedAddresses, address(dsc));
+-        DecentralizedStableCoin TSC = new DecentralizedStableCoin();
+-        TSCEngine engine = new TSCEngine(tokenAddresses, priceFeedAddresses, address(TSC));
  
--        dsc.transferOwnership(address(engine));
+-        TSC.transferOwnership(address(engine));
 +        address predictedEngine = 0xdBc6bEB03Bd0829E8f48A86D121d448c364D3983;
 +
-+        DecentralizedStableCoin dsc = new DecentralizedStableCoin(predictedEngine);
++        DecentralizedStableCoin TSC = new DecentralizedStableCoin(predictedEngine);
 +        
-+        DSCEngine engine = new DSCEngine{salt: keccak256("predictEngine")}(tokenAddresses, priceFeedAddresses, address(dsc));
++        TSCEngine engine = new TSCEngine{salt: keccak256("predictEngine")}(tokenAddresses, priceFeedAddresses, address(TSC));
 +
-+        //dsc.transferOwnership(address(engine));
++        //TSC.transferOwnership(address(engine));
          vm.stopBroadcast();
-         return (dsc, engine, config);
+         return (TSC, engine, config);
      }
 ```
 
@@ -2456,7 +2456,7 @@ _Submitted by [nmirchev8](/profile/clkao1p090000ld08dv6v2xus), [jnrlouis](/profi
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/DSCEngine.sol
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/TSCEngine.sol
 
 ## Summary
 `++i`/`i++` should be `unchecked{++i}`/`unchecked{i++}` when it is not possible for them to overflow, as is the case when used in `for`- and `while`-loops
@@ -2469,7 +2469,7 @@ This saves **30-40 gas [per loop](https://gist.github.com/hrkrshnn/ee8fabd532058
 
 *Instances (2)*:
 ```solidity
-File: src/DSCEngine.sol
+File: src/TSCEngine.sol
 
 119:         for (uint256 i = 0; i < tokenAddresses.length; i++) {
 
@@ -2477,7 +2477,7 @@ File: src/DSCEngine.sol
 
 
 ```
-Link to code - https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/DSCEngine.sol
+Link to code - https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/TSCEngine.sol
 
 ## Tools Used
 Code Review using VSCode
@@ -2491,15 +2491,15 @@ _Submitted by [nmirchev8](/profile/clkao1p090000ld08dv6v2xus), [nisedo](/profile
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L135
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L135
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L149
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L149
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L169
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L169
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L183
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L183
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L282
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L282
 
 ## Summary
 No `amountCollateral` > balance check
@@ -2521,20 +2521,20 @@ _Submitted by [akhilmanga](/profile/clk48iw7c0056l508gqk81x6a), [sobieski](/prof
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L331
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L331
 
 ## Description
 
-Constants should be be used for hardcoded values, especially if the [constants already exist](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L71), as it is in this case in `DSCEngine`.
+Constants should be be used for hardcoded values, especially if the [constants already exist](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L71), as it is in this case in `TSCEngine`.
 
 ```Solidity
     uint256 private constant PRECISION = 1e18;
 ```
 
-In [DSCEngine::_calculateHealthFactor](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L331) the `1e18` can be safely (and contextually) replaced with the already declared `PRECISION` constant.
+In [TSCEngine::_calculateHealthFactor](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L331) the `1e18` can be safely (and contextually) replaced with the already declared `PRECISION` constant.
 
 ```Solidity
-        return (collateralAdjustedForThreshold * 1e18) / totalDscMinted;
+        return (collateralAdjustedForThreshold * 1e18) / totalTSCMinted;
 ```
 
 ## Recommend Mitigation
@@ -2546,15 +2546,15 @@ _Submitted by [akhilmanga](/profile/clk48iw7c0056l508gqk81x6a), [kz0213871](/pro
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L55
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L55
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L104
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L104
 
 ## Summary
-The `error DSCEngine__NotAllowedToken()` should include the address of the disallowed token, to make it easier for the user or dev to see what token is throwing the error.
+The `error TSCEngine__NotAllowedToken()` should include the address of the disallowed token, to make it easier for the user or dev to see what token is throwing the error.
 
 ## Vulnerability Details
-The use of errors should describe the situation that presents the error, in this case the `error DSCEngine__NotAllowedToken()` error does not include the address of the token that is not allowed, even when the modifier that uses it is passed this address by parameter.
+The use of errors should describe the situation that presents the error, in this case the `error TSCEngine__NotAllowedToken()` error does not include the address of the token that is not allowed, even when the modifier that uses it is passed this address by parameter.
 
 ## Impact
 Low
@@ -2565,48 +2565,48 @@ Manual code review
 ## Recommendations
 Change for :
 ```diff
-- `error DSCEngine__NotAllowedToken()`
-+ `error DSCEngine__NotAllowedToken(address token)`
+- `error TSCEngine__NotAllowedToken()`
++ `error TSCEngine__NotAllowedToken(address token)`
 ```
 and 
 ```diff
    modifier isAllowedToken(address token) {
         if (s_priceFeeds[token] == address(0)) {
--            revert DSCEngine__NotAllowedToken();
-+            revert DSCEngine__NotAllowedToken(token);
+-            revert TSCEngine__NotAllowedToken();
++            revert TSCEngine__NotAllowedToken(token);
         }
         _;
     }
 
 
 ```
-## <a id='G-15'></a>G-15. DSC Mint will either return true or revert, thus checking `minted` status in `mintDcs` is unnecessary
+## <a id='G-15'></a>G-15. TSC Mint will either return true or revert, thus checking `minted` status in `mintDcs` is unnecessary
 
 _Submitted by [akhilmanga](/profile/clk48iw7c0056l508gqk81x6a), [JohnnyTime](/profile/clk6vuje90014mm0800cqeo8w), [chainNue](/profile/clkceb0jn000ol8082eekhkg8), [Aamir](/profile/clkcp1q210006k108kwj8txqv). Selected submission by: [chainNue](/profile/clkceb0jn000ol8082eekhkg8)._      
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L202-L204
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L202-L204
 
 ## Summary
 
-DSC Mint will either return true or revert, thus checking `minted` status in `mintDcs` is unnecessary
+TSC Mint will either return true or revert, thus checking `minted` status in `mintDcs` is unnecessary
 
 ## Vulnerability Details
 
-Whe minting DSC via DSCEngine, there is a check status if it's `minted` or not. If it's return false, then it will revert with `DSCEngine__MintFailed`.
+Whe minting TSC via TSCEngine, there is a check status if it's `minted` or not. If it's return false, then it will revert with `TSCEngine__MintFailed`.
 
-But if we check on `DecentralizedStableCoin` contract, the `mint` function will either return true or revert. So the previous check on `mintDsc` is useless.
+But if we check on `DecentralizedStableCoin` contract, the `mint` function will either return true or revert. So the previous check on `mintTSC` is useless.
 
 ```solidity
-File: DSCEngine.sol
-197:     function mintDsc(uint256 amountDscToMint) public moreThanZero(amountDscToMint) nonReentrant {
-198:         s_DSCMinted[msg.sender] += amountDscToMint;
-199:         // if they minted too much ($150 DSC, $100 ETH)
+File: TSCEngine.sol
+197:     function mintTSC(uint256 amountTSCToMint) public moreThanZero(amountTSCToMint) nonReentrant {
+198:         s_TSCMinted[msg.sender] += amountTSCToMint;
+199:         // if they minted too much ($150 TSC, $100 ETH)
 200:         _revertIfHealthFactorIsBroken(msg.sender);
-201:         bool minted = i_dsc.mint(msg.sender, amountDscToMint);
+201:         bool minted = i_TSC.mint(msg.sender, amountTSCToMint);
 202:         if (!minted) {
-203:             revert DSCEngine__MintFailed();
+203:             revert TSCEngine__MintFailed();
 204:         }
 205:     }
 
@@ -2641,15 +2641,15 @@ _Submitted by [JohnLaw](/profile/clk4b3vtt001ald08ew8go29n), [ZedBlockchain](/pr
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L40
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L40
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L210
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L210
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L220
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L220
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L224
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L224
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L365
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L365
 
 ## Summary
 There are numerous instances throughout the codebase where spelling errors have been encountered.
@@ -2658,30 +2658,30 @@ Spelling errors should be strictly avoided.
 
 Instances:
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L40
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L40
 
        @audit change Algoritmically to Algorithmically
      * - Algoritmically Stable
  
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L210
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L210
 
        @audit change you to your
-     * you DSC but keep your collateral in.
+     * you TSC but keep your collateral in.
 
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L220
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L220
 
        @audit change users to user's
-     * @param debtToCover The amount of DSC you want to burn to improve the users health factor
+     * @param debtToCover The amount of TSC you want to burn to improve the users health factor
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L224
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L224
 
       @audit change incentive to incentivize 
      * @notice A known bug would be if the protocol were 100% or less collateralized, then we wouldn't be able to incentive the liquidators. 
 
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L365
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L365
 
          @audit change CL to Chainlink
         // The returned value from CL will be 1000 * 1e8
@@ -2698,7 +2698,7 @@ _Submitted by [0xAxe](/profile/clk43mzqn009wmb08j8o79bfh)._
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L346
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L346
 
 ## Summary
 
@@ -2718,7 +2718,7 @@ https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngin
 
 - Update the comments to keep them consistent.
 ```solidity
-File src/DSCEngine.sol
+File src/TSCEngine.sol
 
 - 346        // ($10e18 * 1e18) / ($2000e8 * 1e10)
 + 346        // ($10e8 * 1e18) / ($2000e8 * 1e10)
@@ -2732,11 +2732,11 @@ _Submitted by [0xSmartContract](/profile/clkfyyoms0006jx08k30qx5nb), [ch0bu](/pr
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L149
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L149
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L183
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L183
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L229
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L229
 
 ## Summary
 
@@ -2753,7 +2753,7 @@ _Submitted by [ZedBlockchain](/profile/clk6kgukh0008ld088n5wns9l)._
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol
 
 https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DecentralizedStableCoin.sol
 
@@ -2761,7 +2761,7 @@ https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/Decentra
 Lack consistency function arguments structure e.g underscores _
 
 ## Vulnerability Details
-DSCEngine.sol does not use underscore _ e.g _to, _amount function arguments however DecentralizedStableCoin.sol has that format instead
+TSCEngine.sol does not use underscore _ e.g _to, _amount function arguments however DecentralizedStableCoin.sol has that format instead
 
 ## Impact
 Informational: This leads to inconsistency in code affecting code quality 
@@ -2783,21 +2783,21 @@ https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0
 
 https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DecentralizedStableCoin.sol#L42C5-L42C53
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L54
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L54
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L53
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L53
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L55
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L55
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L56
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L56
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L57
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L57
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L58
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L58
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L59
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L59
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L60
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L60
 
 ## Summary
 Custom errors need to be descriptive and follow consistent format in code. This is not the case with the errors in all contracts in scope 
@@ -2821,13 +2821,13 @@ Or ‘Not’ a requirement format
 DecentralizedStableCoin__NotMoreThanZero() 
 DecentralizedStableCoin__NotLessThanBalance()
 DecentralizedStableCoin__NotDifferentToZeroAddress();
-DSCEngine.sol consistent use of 'Must' language as in below 
-DSCEngine__NeedsMoreThanZero() -> DSCEngine__MustBeMoreThanZero()
-DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength()-> DSCEngine_MustBeSameLengthTokenAndPriceFeedAddresses()
-DSCEngine__NotAllowedToken() -> DSCEngine__MustBeAllowedToken()
-DSCEngine__BreaksHealthFactor(uint256 healthFactor) -> DSCEngine__MustNotBreakHealthFactor(uint256 healthFactor);
-DSCEngine__HealthFactorOk() -> DSCEngine__HealthIsFactorOk()
-DSCEngine__HealthFactorNotImproved() -> DSCEngine__MustImproveHealthFactor()
+TSCEngine.sol consistent use of 'Must' language as in below 
+TSCEngine__NeedsMoreThanZero() -> TSCEngine__MustBeMoreThanZero()
+TSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength()-> TSCEngine_MustBeSameLengthTokenAndPriceFeedAddresses()
+TSCEngine__NotAllowedToken() -> TSCEngine__MustBeAllowedToken()
+TSCEngine__BreaksHealthFactor(uint256 healthFactor) -> TSCEngine__MustNotBreakHealthFactor(uint256 healthFactor);
+TSCEngine__HealthFactorOk() -> TSCEngine__HealthIsFactorOk()
+TSCEngine__HealthFactorNotImproved() -> TSCEngine__MustImproveHealthFactor()
 Above a just illustrative examples of how to ensure alignment of naming 
 ## <a id='G-21'></a>G-21. Combine Multiple Mapping Address
 
@@ -2835,17 +2835,17 @@ _Submitted by [souilos](/profile/clkm7ipa90014l608xim10mt3), [97Sabit](/profile/
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L78
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L78
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L79
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L79
 
 ## Summary
 Combine multiple address mappings 
 
 ## Vulnerability Details
-DSCEngine.sol line 78 and 79 
+TSCEngine.sol line 78 and 79 
 mapping(address user => mapping(address token => uint256 amount)) private s_collateralDeposited;
-mapping(address user => uint256 amountDscMinted) private s_DSCMinted;
+mapping(address user => uint256 amountTSCMinted) private s_TSCMinted;
 Above can be combined into single mapping 
 
 ## Impact
@@ -2860,7 +2860,7 @@ struct User {
     address user;
     uint256 amountWBTCDeposited; 
     uint256 amountWETHDeposited; 
-    uint256 amountDSCMinted;
+    uint256 amountTSCMinted;
 }
 mapping(address user => User) userInfo;
 ## <a id='G-22'></a>G-22. [G-01] - Use `do-while` loop instead of `for-loop` to save users gas cost.
@@ -2869,15 +2869,15 @@ _Submitted by [Bad](/profile/clk49rqar0004mr08jalnmz03), [97Sabit](/profile/clk4
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L118
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L118
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L353-L357
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L353-L357
 
 ## Details
 
 do-while does not check the first condition and prevents the assembly from executing lots of opcodes needed for conditions checks and all these places are right for it because these all always execute the code inside loops on the first condition.
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L118
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L118
 
 `Deployment Cost`
 
@@ -2897,10 +2897,10 @@ https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngin
 +            i++;
 +        } while (i < tokenAddresses.length);
 +
-         i_dsc = DecentralizedStableCoin(dscAddress);
+         i_TSC = DecentralizedStableCoin(TSCAddress);
 ```
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L353-L357
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L353-L357
 
 | Calculation Type | Before | After | Gas Saved |
 | :--------------- | :----- | :---- | --------: |
@@ -2928,13 +2928,13 @@ _Submitted by [sobieski](/profile/clk7551e0001ol408rl4fyi5s)._
 
 ## Summary
 
-Inside the `_burnDSC` method, DSCEngine contract checks for success of `transferFrom` call and reverts if it is false:
+Inside the `_burnTSC` method, TSCEngine contract checks for success of `transferFrom` call and reverts if it is false:
 
 ```solidity
- bool success = i_dsc.transferFrom(dscFrom, address(this), amountDscToBurn);
+ bool success = i_TSC.transferFrom(TSCFrom, address(this), amountTSCToBurn);
 // This conditional is hypothtically unreachable
 if (!success) {
-    revert DSCEngine__TransferFailed();
+    revert TSCEngine__TransferFailed();
 }
 ```
 
@@ -2955,7 +2955,7 @@ Manual review
 ## Recommendations
 
 Remove the success check
-## <a id='G-24'></a>G-24. Misleading comment in DSCEngine._healthFactor
+## <a id='G-24'></a>G-24. Misleading comment in TSCEngine._healthFactor
 
 _Submitted by [sobieski](/profile/clk7551e0001ol408rl4fyi5s)._      
 				
@@ -2963,7 +2963,7 @@ _Submitted by [sobieski](/profile/clk7551e0001ol408rl4fyi5s)._
 
 ## Summary
 
-The `_healthFactor` method of DSCEngine contract is preceeded by the following comment:
+The `_healthFactor` method of TSCEngine contract is preceeded by the following comment:
 
 ```solidity
 /*
@@ -2971,8 +2971,8 @@ The `_healthFactor` method of DSCEngine contract is preceeded by the following c
 * If a user goes below 1, then they can get liquidated
 */
 function _healthFactor(address user) private view returns (uint256) {
-    (uint256 totalDscMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
-    return _calculateHealthFactor(totalDscMinted, collateralValueInUsd);
+    (uint256 totalTSCMinted, uint256 collateralValueInUsd) = _getAccountInformation(user);
+    return _calculateHealthFactor(totalTSCMinted, collateralValueInUsd);
 }
 ```
 
@@ -3011,71 +3011,71 @@ If there is only one element in `tokenAddresses`, this method would cost more be
 
 Before:
 ```solidity
-File src/DSCEngine.sol
-112:    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
+File src/TSCEngine.sol
+112:    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address TSCAddress) {
 113:        // USD Price Feeds
 114:        if (tokenAddresses.length != priceFeedAddresses.length) {
-115:            revert DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
+115:            revert TSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
 116:        }
 117:        // For example ETH / USD, BTC / USD, MKR / USD, etc
 118:        for (uint256 i = 0; i < tokenAddresses.length; i++) {
 119:            s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i];
 120:            s_collateralTokens.push(tokenAddresses[i]); //Pushing each individual element into the array
 121:        }
-122:        i_dsc = DecentralizedStableCoin(dscAddress);
+122:        i_TSC = DecentralizedStableCoin(TSCAddress);
 123:    }
 ```
 
 After:
 ```solidity
-File src/DSCEngine.sol
-112:    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
+File src/TSCEngine.sol
+112:    constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address TSCAddress) {
 113:        // USD Price Feeds
 114:        if (tokenAddresses.length != priceFeedAddresses.length) {
-115:            revert DSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
+115:            revert TSCEngine__TokenAddressesAndPriceFeedAddressesMustBeSameLength();
 116:        }
 117:        // For example ETH / USD, BTC / USD, MKR / USD, etc
 118:        for (uint256 i = 0; i < tokenAddresses.length; i++) {
 119:            s_priceFeeds[tokenAddresses[i]] = priceFeedAddresses[i];
 120:        }
 121:        s_collateralTokens = tokenAddresses; //Assign the array directly
-122:        i_dsc = DecentralizedStableCoin(dscAddress);
+122:        i_TSC = DecentralizedStableCoin(TSCAddress);
 123:    }
 ```
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L120C1-L120C56
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L120C1-L120C56
 ## <a id='G-26'></a>G-26. [I-1] NatSpec `@param` is missing
 
 _Submitted by [0xbug](/profile/clkch5i9j0008jz088olf29x1), [tsar](/profile/clk9isayj0004l30847ln1e8j). Selected submission by: [0xbug](/profile/clkch5i9j0008jz088olf29x1)._      
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol
 
 
 *Instances (33)*:
 ```diff
-File: https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol
+File: https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol
 
-- 112:     constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
+- 112:     constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address TSCAddress) {
 + 112: // @param tokenAddresses
 
-- 112:     constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
+- 112:     constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address TSCAddress) {
 + 112: // @param priceFeedAddresses
 
-- 112:     constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address dscAddress) {
-+ 112: // @param dscAddress
+- 112:     constructor(address[] memory tokenAddresses, address[] memory priceFeedAddresses, address TSCAddress) {
++ 112: // @param TSCAddress
 
-- 212:     function burnDsc(uint256 amount) public moreThanZero(amount) {
+- 212:     function burnTSC(uint256 amount) public moreThanZero(amount) {
 + 212: // @param amount
 
-- 272:     function _burnDsc(uint256 amountDscToBurn, address onBehalfOf, address dscFrom) private {
-+ 272: // @param amountDscToBurn
+- 272:     function _burnTSC(uint256 amountTSCToBurn, address onBehalfOf, address TSCFrom) private {
++ 272: // @param amountTSCToBurn
 
-- 272:     function _burnDsc(uint256 amountDscToBurn, address onBehalfOf, address dscFrom) private {
+- 272:     function _burnTSC(uint256 amountTSCToBurn, address onBehalfOf, address TSCFrom) private {
 + 272: // @param onBehalfOf
 
-- 272:     function _burnDsc(uint256 amountDscToBurn, address onBehalfOf, address dscFrom) private {
-+ 272: // @param dscFrom
+- 272:     function _burnTSC(uint256 amountTSCToBurn, address onBehalfOf, address TSCFrom) private {
++ 272: // @param TSCFrom
 
 - 282:     function _redeemCollateral(address from, address to, address tokenCollateralAddress, uint256 amountCollateral)
 + 282: // @param from
@@ -3098,10 +3098,10 @@ File: https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DS
 - 317:     function _revertIfHealthFactorIsBroken(address user) internal view {
 + 317: // @param user
 
-- 324:     function _calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
-+ 324: // @param totalDscMinted
+- 324:     function _calculateHealthFactor(uint256 totalTSCMinted, uint256 collateralValueInUsd)
++ 324: // @param totalTSCMinted
 
-- 324:     function _calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
+- 324:     function _calculateHealthFactor(uint256 totalTSCMinted, uint256 collateralValueInUsd)
 + 324: // @param collateralValueInUsd
 
 - 340:     function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256) {
@@ -3122,10 +3122,10 @@ File: https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DS
 - 369:     function getAccountInformation(address user)
 + 369: // @param user
 
-- 385:     function calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
-+ 385: // @param totalDscMinted
+- 385:     function calculateHealthFactor(uint256 totalTSCMinted, uint256 collateralValueInUsd)
++ 385: // @param totalTSCMinted
 
-- 385:     function calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
+- 385:     function calculateHealthFactor(uint256 totalTSCMinted, uint256 collateralValueInUsd)
 + 385: // @param collateralValueInUsd
 
 - 393:     function getHealthFactor(address user) external view returns (uint256) {
@@ -3172,7 +3172,7 @@ _Submitted by [0xbug](/profile/clkch5i9j0008jz088olf29x1), [tsar](/profile/clk9i
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/DSCEngine.sol
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/TSCEngine.sol
 
 https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/DecentralizedStableCoin.sol
 
@@ -3182,13 +3182,13 @@ NatSpec `@return` argument is missing
 ## Vulnerability Details
 *Instances (19)*:
 ```solidity
-File: src/DSCEngine.sol
+File: src/TSCEngine.sol
 
 299:     function _getAccountInformation(address user)
 
 312:     function _healthFactor(address user) private view returns (uint256) {
 
-326:     function _calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
+326:     function _calculateHealthFactor(uint256 totalTSCMinted, uint256 collateralValueInUsd)
 
 342:     function getTokenAmountFromUsd(address token, uint256 usdAmountInWei) public view returns (uint256) {
 
@@ -3202,7 +3202,7 @@ File: src/DSCEngine.sol
 
 385:     function getPrecision() external pure returns (uint256) {
 
-389:     function calculateHealthFactor(uint256 totalDscMinted, uint256 collateralValueInUsd)
+389:     function calculateHealthFactor(uint256 totalTSCMinted, uint256 collateralValueInUsd)
 
 397:     function getHealthFactor(address user) external view returns (uint256) {
 
@@ -3218,11 +3218,11 @@ File: src/DSCEngine.sol
 
 421:     function getCollateralBalanceOfUser(address user, address token) external view returns (uint256) {
 
-425:     function getDsc() external view returns (address) {
+425:     function getTSC() external view returns (address) {
 
 
 ```
-Link to code - https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/DSCEngine.sol
+Link to code - https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/TSCEngine.sol
 
 ```solidity
 File: src/DecentralizedStableCoin.sol
@@ -3245,7 +3245,7 @@ _Submitted by [0xbug](/profile/clkch5i9j0008jz088olf29x1), [neocrao](/profile/cl
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol
 
 ## Summary
 Doing so will prevent [typo bugs](https://www.moserware.com/2008/01/constants-on-left-are-better-but-this.html)
@@ -3254,11 +3254,11 @@ Doing so will prevent [typo bugs](https://www.moserware.com/2008/01/constants-on
 
 *Instances (4)*:
 ```solidity
-File: src/DSCEngine.sol
+File: src/TSCEngine.sol
 
 96:         if (amount == 0) {
 
-329:         if (totalDscMinted == 0) return type(uint256).max;
+329:         if (totalTSCMinted == 0) return type(uint256).max;
 
 ```
 
@@ -3281,7 +3281,7 @@ _Submitted by [0xbug](/profile/clkch5i9j0008jz088olf29x1), [hunterw3b](/profile/
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol
 
 ## Summary
 
@@ -3316,7 +3316,7 @@ _Submitted by [0xbug](/profile/clkch5i9j0008jz088olf29x1), [ch0bu](/profile/clk3
 	
 https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DecentralizedStableCoin.sol#L58
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L103
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L103
 
 ## Summary
 Using `assembly` to check for `address(0)` is gas-efficient. <be>
@@ -3329,7 +3329,7 @@ File: src/DecentralizedStableCoin.sol
 ```
 
 ```solidity
-File: src/DSCEngine.sol
+File: src/TSCEngine.sol
 
 103:  if (s_priceFeeds[token] == address(0)) {
 ```
@@ -3341,24 +3341,24 @@ _Submitted by [funkornaut](/profile/clk4161cu0030mb08pybakf1m)._
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L181
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L181
 
 ## Summary
 This comment on the redeemCollateral function is misleading
-`* @notice If you have DSC minted, you will not be able to redeem until you burn your DSC`
+`* @notice If you have TSC minted, you will not be able to redeem until you burn your TSC`
 
 ## Vulnerability Details
-The `redeemCollateral` function does not directly require the user to burn DSC to redeem their collateral. Instead, it checks whether the operation would break the health factor. In cases where a user has a high collateralization ratio, they may redeem some of their collateral without burning DSC while keeping their health factor above the threshold. Therefore, the NatSpec comment may inaccurately represent the `redeemCollateral` functionality under certain conditions.
+The `redeemCollateral` function does not directly require the user to burn TSC to redeem their collateral. Instead, it checks whether the operation would break the health factor. In cases where a user has a high collateralization ratio, they may redeem some of their collateral without burning TSC while keeping their health factor above the threshold. Therefore, the NatSpec comment may inaccurately represent the `redeemCollateral` functionality under certain conditions.
 
-PoC: Add this test to `DSCEngineTest.t.sol` and it passes 
+PoC: Add this test to `TSCEngineTest.t.sol` and it passes 
 ```
-    function testCanRedeemCollateralWithSomeDSCMintedAndNotBurnDSC() public {
-        //user deposits a large amout of weth and mints a small amount of dsc
+    function testCanRedeemCollateralWithSomeTSCMintedAndNotBurnTSC() public {
+        //user deposits a large amout of weth and mints a small amount of TSC
         vm.startPrank(user);
-        ERC20Mock(weth).approve(address(dsce), 1000);
-        dsce.depositCollateralAndMintDsc(weth, 1000, 1);
-        //user redeems some collateral without burning any dsc
-        dsce.redeemCollateral(weth, 10);
+        ERC20Mock(weth).approve(address(TSCe), 1000);
+        TSCe.depositCollateralAndMintTSC(weth, 1000, 1);
+        //user redeems some collateral without burning any TSC
+        TSCe.redeemCollateral(weth, 10);
         vm.stopPrank;
     }
 ```
@@ -3370,14 +3370,14 @@ This comment can lead users and auditors to misunderstand how the function works
 Manual Review
 
 ## Recommendations
-Remove the NatSpec line or further clarify that the `redeemCollateral` function may revert if the user has too much DSC minted and will need to burn DSC before calling the function again.
+Remove the NatSpec line or further clarify that the `redeemCollateral` function may revert if the user has too much TSC minted and will need to burn TSC before calling the function again.
 ## <a id='G-32'></a>G-32. Use hardcode address instead address(this)
 
 _Submitted by [souilos](/profile/clkm7ipa90014l608xim10mt3), [TheSavageTeddy](/profile/clk9nkvfc0000m9080ev2utin), [SAQ](/profile/clkftc56x0006le08usdp7epo). Selected submission by: [SAQ](/profile/clkftc56x0006le08usdp7epo)._      
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L157
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L157
 
 ## Summary
 
@@ -3387,12 +3387,12 @@ https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngin
 References: https://book.getfoundry.sh/reference/forge-std/compute-create-address
 
 ```solidity
-file: /src/DSCEngine.sol
+file: /src/TSCEngine.sol
 
 157        bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(this), amountCollateral);
 
 ```
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L157
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L157
 
 ## <a id='G-33'></a>G-33. Using `nonReentrant` when it's unnecessary
 
@@ -3400,14 +3400,14 @@ _Submitted by [Dliteofficial](/profile/clk40ntj2001mmb08zbxnflu4), [iurii2002](/
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L153
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L153
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L186
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L186
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L197
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L197
 
 ## Details
-In `depositCollateral`, `redeemCollateral`, `mintDsc` and `liquidate` functions you are using `nonReentrant` modifier to prevent reentarny but since the only external call is calling a function on ERC20 tokens there is no way to someone be able to re enter the function, even if attacker some how re enter the function nothing will break since you update the state before sending tokens. 
+In `depositCollateral`, `redeemCollateral`, `mintTSC` and `liquidate` functions you are using `nonReentrant` modifier to prevent reentarny but since the only external call is calling a function on ERC20 tokens there is no way to someone be able to re enter the function, even if attacker some how re enter the function nothing will break since you update the state before sending tokens. 
 
 `nonReentrant` modifier update the state two times, by using this modifier in functions they cost a lots of gas, for being more safe you can only use it with `liquidate` function and remove it from other functions.
 
@@ -3427,8 +3427,8 @@ In `depositCollateral`, `redeemCollateral`, `mintDsc` and `liquidate` functions 
     {
 
 
--    function mintDsc(uint256 amountDscToMint) public moreThanZero(amountDscToMint) nonReentrant {
-+    function mintDsc(uint256 amountDscToMint) public moreThanZero(amountDscToMint) {
+-    function mintTSC(uint256 amountTSCToMint) public moreThanZero(amountTSCToMint) nonReentrant {
++    function mintTSC(uint256 amountTSCToMint) public moreThanZero(amountTSCToMint) {
 ```
 
 
@@ -3438,13 +3438,13 @@ _Submitted by [0x0115](/profile/clk4scd7q0000l208rpyf7gvh)._
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L158-L160
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L158-L160
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L56
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L56
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L276-L278
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L276-L278
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L288-L290
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L288-L290
 
 ## Summary
 
@@ -3452,7 +3452,7 @@ This is an informational finding. The error being thrown can add more informatio
 
 ## Code Snippet
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L158-L160
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L158-L160
 
 ## Vulnerability Details
 
@@ -3468,17 +3468,17 @@ Manual Review
 
 ## Recommendations
 
-In file `DSCEngine.sol`, these can be fixed:
+In file `TSCEngine.sol`, these can be fixed:
 
 ```diff
 
 ...
 
-    error DSCEngine__NotAllowedToken();
--   error DSCEngine__TransferFailed();
-+   error DSCEngine__TransferFailed(address token);
-    error DSCEngine__BreaksHealthFactor(uint256 healthFactor);
-    error DSCEngine__MintFailed();
+    error TSCEngine__NotAllowedToken();
+-   error TSCEngine__TransferFailed();
++   error TSCEngine__TransferFailed(address token);
+    error TSCEngine__BreaksHealthFactor(uint256 healthFactor);
+    error TSCEngine__MintFailed();
 
 ...
 
@@ -3492,22 +3492,22 @@ function depositCollateral(address tokenCollateralAddress, uint256 amountCollate
         emit CollateralDeposited(msg.sender, tokenCollateralAddress, amountCollateral);
         bool success = IERC20(tokenCollateralAddress).transferFrom(msg.sender, address(this), amountCollateral); 
         if (!success) {
--            revert DSCEngine__TransferFailed(); // @audit informational - it is better to put token address or the tx sender: msg.sender in the error message. i.e. DSCEngine__TransferFailed(msg.sender, tokenCollateralAddress);
-+            revert DSCEngine__TransferFailed(tokenCollateralAddress); // @audit informational - it is better to put token address or the tx sender: msg.sender in the error message. i.e. DSCEngine__TransferFailed(msg.sender, tokenCollateralAddress);
+-            revert TSCEngine__TransferFailed(); // @audit informational - it is better to put token address or the tx sender: msg.sender in the error message. i.e. TSCEngine__TransferFailed(msg.sender, tokenCollateralAddress);
++            revert TSCEngine__TransferFailed(tokenCollateralAddress); // @audit informational - it is better to put token address or the tx sender: msg.sender in the error message. i.e. TSCEngine__TransferFailed(msg.sender, tokenCollateralAddress);
         }
     }
 ```
 
 ```diff
-function _burnDsc(uint256 amountDscToBurn, address onBehalfOf, address dscFrom) private {
-        s_DSCMinted[onBehalfOf] -= amountDscToBurn;
-        bool success = i_dsc.transferFrom(dscFrom, address(this), amountDscToBurn);
+function _burnTSC(uint256 amountTSCToBurn, address onBehalfOf, address TSCFrom) private {
+        s_TSCMinted[onBehalfOf] -= amountTSCToBurn;
+        bool success = i_TSC.transferFrom(TSCFrom, address(this), amountTSCToBurn);
         // This conditional is hypothtically unreachable
         if (!success) {
--            revert DSCEngine__TransferFailed();
-+            revert DSCEngine__TransferFailed(address(i_dsc));
+-            revert TSCEngine__TransferFailed();
++            revert TSCEngine__TransferFailed(address(i_TSC));
         }
-        i_dsc.burn(amountDscToBurn);
+        i_TSC.burn(amountTSCToBurn);
     }
 ```
 
@@ -3519,8 +3519,8 @@ function _redeemCollateral(address from, address to, address tokenCollateralAddr
         emit CollateralRedeemed(from, to, tokenCollateralAddress, amountCollateral);
         bool success = IERC20(tokenCollateralAddress).transfer(to, amountCollateral);
         if (!success) {
--            revert DSCEngine__TransferFailed();
-+            revert DSCEngine__TransferFailed(tokenCollateralAddress);
+-            revert TSCEngine__TransferFailed();
++            revert TSCEngine__TransferFailed(tokenCollateralAddress);
         }
     }
 ```
@@ -3581,7 +3581,7 @@ _Submitted by [ABA](/profile/clk43rqfo0008mg084q0ema3g), [mau](/profile/clk9v1fg
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/DSCEngine.sol#L26
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/d1c5501aa79320ca0aeaa73f47f0dbc88c7b77e2/src/TSCEngine.sol#L26
 
 ## Summary
 
@@ -3651,7 +3651,7 @@ _Submitted by [0xFEll](/profile/clk8yoz9i0000jy080toixh10)._
 
 
 ## Summary
-**Potential Reentrancy Attack**: Even though the contract uses a reentrancy guard, it's crucial to ensure that all external calls are at the end of the function (the Checks-Effects-Interactions pattern). In the `liquidate` function, the `_redeemCollateral` function (which makes an external call) is followed by `_burnDsc` which alters the state. This could potentially lead to a reentrancy attack. 
+**Potential Reentrancy Attack**: Even though the contract uses a reentrancy guard, it's crucial to ensure that all external calls are at the end of the function (the Checks-Effects-Interactions pattern). In the `liquidate` function, the `_redeemCollateral` function (which makes an external call) is followed by `_burnTSC` which alters the state. This could potentially lead to a reentrancy attack. 
 
 ## Vulnerability Details
 
@@ -3661,7 +3661,7 @@ _Submitted by [0xFEll](/profile/clk8yoz9i0000jy080toixh10)._
 chaingpt
 
 ## Recommendations
-Swap the order of _redeemCollateral and _burnDsc on the liquidate function
+Swap the order of _redeemCollateral and _burnTSC on the liquidate function
 ## <a id='G-39'></a>G-39. >= costs less gas than >
 
 _Submitted by [lwltea](/profile/clk7224p9000ujt08g853wh48), [SAQ](/profile/clkftc56x0006le08usdp7epo). Selected submission by: [SAQ](/profile/clkftc56x0006le08usdp7epo)._      
@@ -3690,7 +3690,7 @@ _Submitted by [kz0213871](/profile/clk9oqssu0008me08w56bq8n4)._
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/DSCEngine.sol#L229
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/blob/main/src/TSCEngine.sol#L229
 
 ## Summary
 Throughout the contract when you want to refer to the collateral token address variable, it is referred to as tokenCollateralAddress and only in the liquidate function is it referred to as collateral.
@@ -3737,7 +3737,7 @@ _Submitted by [crypt0mate](/profile/clk82i8pg0000jo08jat0qepq)._
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/foundry-defi-stablecoin-f23/blob/main/src/DSCEngine.sol#L238-L240
+https://github.com/Cyfrin/foundry-defi-stablecoin-f23/blob/main/src/TSCEngine.sol#L238-L240
 
 
 ## Summary
@@ -3756,7 +3756,7 @@ Manual code inspection
 Change this:
 ```
 if (minted != true) {
-    revert DSCEngine__MintFailed();
+    revert TSCEngine__MintFailed();
 }
 ```
 
@@ -3764,7 +3764,7 @@ to:
 
 ```
 if (!minted) {
-    revert DSCEngine__MintFailed();
+    revert TSCEngine__MintFailed();
 }
 ```
 
@@ -3776,9 +3776,9 @@ _Submitted by [xfu](/profile/clke2oift0000l508j03apihy)._
 				
 ### Relevant GitHub Links
 	
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/DSCEngine.sol#L157
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/TSCEngine.sol#L157
 
-https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/DSCEngine.sol#L287
+https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/TSCEngine.sol#L287
 
 ## Summary
 
@@ -3790,9 +3790,9 @@ While this is done at some places, it’s not consistently done in the solution.
 
 **There are `2` instances of this issue:**
 
-- Adding a non-zero-value check for [success = IERC20(tokenCollateralAddress).transferFrom(msg.sender,address(this),amountCollateral)](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/DSCEngine.sol#L157) at the beginning of [DSCEngine.depositCollateral(address,uint256)](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/DSCEngine.sol#L149-L161)
+- Adding a non-zero-value check for [success = IERC20(tokenCollateralAddress).transferFrom(msg.sender,address(this),amountCollateral)](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/TSCEngine.sol#L157) at the beginning of [TSCEngine.depositCollateral(address,uint256)](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/TSCEngine.sol#L149-L161)
 
-- Adding a non-zero-value check for [success = IERC20(tokenCollateralAddress).transfer(to,amountCollateral)](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/DSCEngine.sol#L287) at the beginning of [DSCEngine.\_redeemCollateral(address,address,address,uint256)](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/DSCEngine.sol#L282-L291)
+- Adding a non-zero-value check for [success = IERC20(tokenCollateralAddress).transfer(to,amountCollateral)](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/TSCEngine.sol#L287) at the beginning of [TSCEngine.\_redeemCollateral(address,address,address,uint256)](https://github.com/Cyfrin/2023-07-foundry-defi-stablecoin/tree/main/src/TSCEngine.sol#L282-L291)
 
 ## Impact
 
@@ -3808,7 +3808,7 @@ _Submitted by [owade](/profile/clk9j4mf20002mi08k4758eni)._
 
 
 ## Summary
-In DSCEngine.sol, collateral and debtToCover are not checked if valid in liquidate() function.
+In TSCEngine.sol, collateral and debtToCover are not checked if valid in liquidate() function.
 ## Vulnerability Details
 The liquidate function does not revert early if collateral and debtToCover are not valid
 ## Impact
@@ -3826,10 +3826,10 @@ Use the following
         // need to check health factor of the user
         uint256 startingUserHealthFactor = _healthFactor(user);
         if (startingUserHealthFactor >= MIN_HEALTH_FACTOR) {
-            revert DSCEngine__HealthFactorOk();
+            revert TSCEngine__HealthFactorOk();
         }
         if(debtToCover > getCollateralBalanceOfUser(user,collateral)){
-            revert DSCEngine__ExcessDebtToCover();
+            revert TSCEngine__ExcessDebtToCover();
         }
 
         //......

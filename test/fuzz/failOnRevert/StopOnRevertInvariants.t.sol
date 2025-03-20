@@ -9,18 +9,18 @@ pragma solidity ^0.8.19;
 
 import { Test } from "forge-std/Test.sol";
 import { StdInvariant } from "forge-std/StdInvariant.sol";
-import { DSCEngine } from "../../../src/DSCEngine.sol";
+import { TSCEngine } from "../../../src/TSCEngine.sol";
 import { DecentralizedStableCoin } from "../../../src/DecentralizedStableCoin.sol";
 import { HelperConfig } from "../../../script/HelperConfig.s.sol";
-import { DeployDSC } from "../../../script/DeployDSC.s.sol";
+import { DeployTSC } from "../../../script/DeployTSC.s.sol";
 // import { ERC20Mock } from "@openzeppelin/contracts/mocks/ERC20Mock.sol"; Updated mock location
 import { ERC20Mock } from "../../mocks/ERC20Mock.sol";
 import { StopOnRevertHandler } from "./StopOnRevertHandler.t.sol";
 import { console } from "forge-std/console.sol";
 
 contract StopOnRevertInvariants is StdInvariant, Test {
-    DSCEngine public dsce;
-    DecentralizedStableCoin public dsc;
+    TSCEngine public TSCe;
+    DecentralizedStableCoin public TSC;
     HelperConfig public helperConfig;
 
     address public ethUsdPriceFeed;
@@ -43,21 +43,21 @@ contract StopOnRevertInvariants is StdInvariant, Test {
     StopOnRevertHandler public handler;
 
     function setUp() external {
-        DeployDSC deployer = new DeployDSC();
-        (dsc, dsce, helperConfig) = deployer.run();
+        DeployTSC deployer = new DeployTSC();
+        (TSC, TSCe, helperConfig) = deployer.run();
         (ethUsdPriceFeed, btcUsdPriceFeed, weth, wbtc,) = helperConfig.activeNetworkConfig();
-        handler = new StopOnRevertHandler(dsce, dsc);
+        handler = new StopOnRevertHandler(TSCe, TSC);
         targetContract(address(handler));
         // targetContract(address(ethUsdPriceFeed)); Why can't we just do this?
     }
 
     function invariant_protocolMustHaveMoreValueThatTotalSupplyDollars() public view {
-        uint256 totalSupply = dsc.totalSupply();
-        uint256 wethDeposted = ERC20Mock(weth).balanceOf(address(dsce));
-        uint256 wbtcDeposited = ERC20Mock(wbtc).balanceOf(address(dsce));
+        uint256 totalSupply = TSC.totalSupply();
+        uint256 wethDeposted = ERC20Mock(weth).balanceOf(address(TSCe));
+        uint256 wbtcDeposited = ERC20Mock(wbtc).balanceOf(address(TSCe));
 
-        uint256 wethValue = dsce.getUsdValue(weth, wethDeposted);
-        uint256 wbtcValue = dsce.getUsdValue(wbtc, wbtcDeposited);
+        uint256 wethValue = TSCe.getUsdValue(weth, wethDeposted);
+        uint256 wbtcValue = TSCe.getUsdValue(wbtc, wbtcDeposited);
 
         console.log("wethValue: %s", wethValue);
         console.log("wbtcValue: %s", wbtcValue);
@@ -66,16 +66,16 @@ contract StopOnRevertInvariants is StdInvariant, Test {
     }
 
     function invariant_gettersCantRevert() public view {
-        dsce.getAdditionalFeedPrecision();
-        dsce.getCollateralTokens();
-        dsce.getLiquidationBonus();
-        dsce.getLiquidationThreshold();
-        dsce.getMinHealthFactor();
-        dsce.getPrecision();
-        dsce.getDsc();
-        // dsce.getTokenAmountFromUsd();
-        // dsce.getCollateralTokenPriceFeed();
-        // dsce.getCollateralBalanceOfUser();
+        TSCe.getAdditionalFeedPrecision();
+        TSCe.getCollateralTokens();
+        TSCe.getLiquidationBonus();
+        TSCe.getLiquidationThreshold();
+        TSCe.getMinHealthFactor();
+        TSCe.getPrecision();
+        TSCe.getTSC();
+        // TSCe.getTokenAmountFromUsd();
+        // TSCe.getCollateralTokenPriceFeed();
+        // TSCe.getCollateralBalanceOfUser();
         // getAccountCollateralValue();
     }
 }
