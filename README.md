@@ -1,9 +1,10 @@
-# Foundry DeFi Stablecoin
+# Stablecoin-using-Chainlink-and-Foundry-tests
 
-This is a section of the Cyfrin Foundry Solidity Course.
+This is part of the training of the Patrick Collins's Advanced Foundry course by Cyfrin Updraft, learning how to use Chainlink Pricefeed and Keepers integrated to a Stablecoin contract and using Foundry for advanced testing and fuzzing techniques.
 
-[TSCEngine Example](https://sepolia.etherscan.io/address/0x091ea0838ebd5b7dda2f2a641b068d6d59639b98#code)
-[Decentralized Stablecoin Example](https://sepolia.etherscan.io/address/0xf30021646269007b0bdc0763fd736c6380602f2f#code)
+The stablecoin created is TestStableCoin with the TSC ticker, and I deployed it to Somnia testnet here:
+
+[Stablecoin]((https://somnia-testnet.socialscan.io/address/0x165261c1BDd0bAF7970b089888880FdEC0D2351e))
 
 # About
 
@@ -195,7 +196,7 @@ So, then you have two options:
 
 # Thank you!
 
-If you appreciated this, feel free to follow me or donate!
+If you appreciated this, feel free to follow or donate to PATRICK COLLINS!
 
 ETH/zkSync/Arbitrum/Optimism Address(`cyfrin1.eth`): 0x3846c3A30E62075Fa916216b35EF04B8F53931f6
 
